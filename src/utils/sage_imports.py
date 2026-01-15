@@ -37,6 +37,7 @@ from sage.all import (
     SR,
     identity_matrix,
     random_matrix,
+    parallel,
 )
 from sage.matrix.matrix_generic_dense import Matrix_generic_dense
 from sage.matrix.matrix_integer_dense import Matrix_integer_dense

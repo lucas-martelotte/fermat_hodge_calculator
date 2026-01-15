@@ -36,7 +36,6 @@ from sage.all import (
     I,
     SR,
     identity_matrix,
-    Singular,
     random_matrix,
 )
 from sage.matrix.matrix_generic_dense import Matrix_generic_dense

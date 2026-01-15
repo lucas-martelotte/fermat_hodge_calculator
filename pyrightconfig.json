@@ -1,0 +1,5 @@
+{
+    "reportMissingTypeStubs": false,
+    "reportUnknownVariableType": false,
+    "reportAttributeAccessIssue": false
+}

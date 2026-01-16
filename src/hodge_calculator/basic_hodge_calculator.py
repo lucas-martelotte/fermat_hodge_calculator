@@ -17,6 +17,7 @@ from src.utils.sage_imports import (
     parallel,
     Vector_integer_dense,
     block_matrix,
+    identity_matrix
 )
 from src.utils.auxiliary import coprimes, Z_basis_of_kernel
 from src.utils.json_manager import JsonManager
@@ -56,12 +57,9 @@ class BasicHodgeCalculator(JsonManager):
         O, zetad = K.ring_of_integers(), K.gen()
         # M = zero_matrix(O, len(J), len(I))
 
-        start_time = perf_counter()
         basis_of_primitive_hodge_cycles = get_Z_basis_of_kernel_of_pairing(
             self.variety.weights, self.variety.degree, I, J
         )
-        end_time = perf_counter()
-        print(end_time - start_time)
 
         # @parallel()
         # def compute_entry(index: tuple[int, int]) -> None:
@@ -133,7 +131,7 @@ class BasicHodgeCalculator(JsonManager):
 # === MULTIPROCESSING SCRIPT === #
 # ============================== #
 
-NCORES = 4
+NCORES = 8
 
 
 def simple_pairing(
@@ -165,6 +163,8 @@ def simple_pairing_matrix_entry_calculator_worker(
 def get_Z_basis_of_kernel_of_pairing(
     weights: list[int], degree: int, I: list[tuple[int, ...]], J: list[int]
 ) -> Matrix_integer_dense:
+    if len(J) == 0: # Then the kernel is everything
+        return identity_matrix(ZZ, len(I))
     zetad = CyclotomicField(degree).gen()
     with Pool(NCORES) as pool:
         tasks = [

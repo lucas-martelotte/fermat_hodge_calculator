@@ -3,3 +3,4 @@ from .degree_3_surfaces import get_degree_3_surface
 from .degree_4_surfaces import get_degree_4_surface
 from .degree_5_surfaces import get_degree_5_surface
 from .degree_6_surfaces import get_degree_6_surface
+from .degree_7_surfaces import get_degree_7_surface

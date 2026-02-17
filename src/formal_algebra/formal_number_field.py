@@ -13,6 +13,7 @@ from src.utils.sage_imports import (
     prod,
     QQ,
 )
+from src.utils.auxiliary import return_true
 
 
 class FormalNumberField:
@@ -35,9 +36,9 @@ class FormalNumberField:
 
         varnames = [str(x)[:-4] for x in self.Kbase_variables]
         self.K = self.Kbase.quotient(self.Kbase_ideal, names=varnames)
-        self.K.element_class.divides = lambda _1, _2: True
-        self.K.defining_ideal().is_prime = lambda: True
-        self.K.is_field = lambda: True
+        self.K.element_class.divides = return_true
+        self.K.defining_ideal().is_prime = return_true
+        self.K.is_field = return_true
         self.K_variables = self.K.gens()
 
         self.monomial_indexes = list(
@@ -52,10 +53,10 @@ class FormalNumberField:
             for m in self.monomial_indexes
         ]
         self.degree = len(self.K_monomials)
-        self._locals = {str(x): x for x in self.K_variables}
+        self.locals = {str(x): x for x in self.K_variables}
 
     def from_str(self, expr: str) -> PolynomialQuotientRingElement:
         """Parses a string expression as an element of K"""
-        local_variables = self._locals
+        local_variables = self.locals
         local_variables["zeta2"] = -1  # exception for degree 2
         return sage_eval(expr, locals=local_variables)

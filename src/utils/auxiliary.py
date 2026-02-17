@@ -53,6 +53,10 @@ def sage_matrix_map(f, m):
     return [[f(m[i, j]) for j in range(m.ncols())] for i in range(m.nrows())]
 
 
+def return_true(*args) -> bool:
+    return True
+
+
 def get_pairings(n: int) -> list[list[tuple[int, int]]]:
     """
     Returns all pairings of the sequence [0, ..., n-1], i.e.

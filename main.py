@@ -5,34 +5,36 @@ from src.formal_algebra import (
     FormalCyclotomicField,
     PolynomialRingOverFormalNumberField,
 )
+from src.scripts import (
+    get_degree_2_surface,
+    get_degree_3_surface,
+    get_degree_4_surface,
+    get_degree_5_surface,
+    get_degree_6_surface,
+)
 from src.hodge_calculator import BasicHodgeCalculator
 from time import perf_counter
 
 start_time = perf_counter()
 
-d = 2
-K_formal = FormalCyclotomicField(2 * d)
 
+# X, calculator = get_degree_2_surface((2, 2, 2, 2))
+# X, calculator = get_degree_3_surface((3, 3, 3, 3))
+# X, calculator = get_degree_4_surface((4, 4, 4, 4))
+# X, calculator = get_degree_5_surface((5, 5, 5, 5))
+X, calculator = get_degree_6_surface((6, 6, 6, 6))
 
-from src.utils.sage_imports import Matrix
-
+R_formal = X.formal_polynomial_ring
+K_formal = X.formal_base_field
 zetad = K_formal.K.gen()
-A = Matrix(K_formal.K, 5, 1, lambda i, j: zetad**i)
 
-
-R_formal = PolynomialRingOverFormalNumberField(
-    K_formal, ["x0", "x1", "x2", "x3"]
-)
-X = EvenDimensionalDiagonalVariety(R_formal, tuple([d] * 4))
-calculator = BasicHodgeCalculator(
-    X, override_files=["basis_of_primitive_hodge_cycles"]
-)
+periods = calculator.get_period_matrix_of_primitive_hodge_cycles()
 rank = calculator.get_rank_of_primitive_hodge_cycles()
-print(rank)
+print(periods)
 
 
-end_time = perf_counter()
-print(end_time - start_time)
+# end_time = perf_counter()
+# print(end_time - start_time)
 
 
 # Still need to fix degree 7 and 8

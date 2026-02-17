@@ -35,8 +35,13 @@ class HodgeCalculator(BasicHodgeCalculator):
             complete_override=complete_override,
             override_files=override_files,
         )
+        self.file_to_computation.update(
+            {
+                "periods_of_primitive_hodge_cycles": self.__compute_periods_of_primitive_hodge_cycles
+            }
+        )
 
-    def __compute_periods_of_basis_of_primitive_hodge_cycles(
+    def __compute_periods_of_primitive_hodge_cycles(
         self,
     ) -> dict[str, Any]:
         rank_of_hodge_cycles = self.get_rank_of_primitive_hodge_cycles()
@@ -47,9 +52,6 @@ class HodgeCalculator(BasicHodgeCalculator):
             )
         I = self.multi_indexes
         J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
-        # J_hodge_alg = (
-        #    self.get_form_idxs_at_infty_in_middle_hodge_comp_with_alg_gamma()
-        # )
         hodge_cycle_basis = self.get_basis_of_primitive_hodge_cycles()
         full_period_mat = zero_matrix(
             self.variety.base_field, len(I), len(J_hodge)
@@ -64,19 +66,8 @@ class HodgeCalculator(BasicHodgeCalculator):
                 self.gamma_values,
             )
         )
-        # for i, j in tqdm(
-        #    iterprod(range(len(I)), J_hodge_alg),
-        #    desc="Computing periods of all topological cycles",
-        #    total=len(I) * len(J_hodge_alg),
-        # ):  # Forms with non-algebric gamma have zero period automatically
-        #    full_period_mat[i, J_hodge.index(j)] = self.full_pairing(
-        #        I[i], I[j]
-        #    )
         hodge_period_mat = (full_period_mat.T * hodge_cycle_basis).T
         return {
-            "period_matrix_of_all_topological_cycles": sage_matrix_map(
-                str, full_period_mat
-            ),
             "period_matrix_of_primitive_hodge_cycles": sage_matrix_map(
                 str, hodge_period_mat
             ),
@@ -100,7 +91,8 @@ class HodgeCalculator(BasicHodgeCalculator):
             "period_matrix_of_primitive_hodge_cycles",
         )
         return Matrix(
-            self.variety.base_field, sage_matrix_map(eval, matrix_raw)
+            self.variety.base_field,
+            [[eval(p) for p in row] for row in matrix_raw],
         )
 
 
@@ -121,15 +113,16 @@ def full_pairing(
     the Gamma factors. The cycle is any cycle and the form is written
     in the standard basis, i.e. it is a tuple in the list multi_indexes.
     """
-    n = len(weights)
+    if gamma_value is None:  # Then it is not algebraic, so period is zero
+        return 0
+    n = len(weights) - 2
     simple_pair = prod(
         zetad ** (weights[i] * (cycle[i] + 1) * (form[i] + 1))
         - zetad ** (weights[i] * cycle[i] * (form[i] + 1))
-        for i in range(n)
+        for i in range(n + 2)
     )
     if simple_pair == 0:
         return 0
-    assert gamma_value is not None
     return (-1) ** (n + 1) * simple_pair * gamma_value / factorial(n // 2)
 
 
@@ -153,22 +146,25 @@ def get_period_matrix_of_prim_hodge_cycles_multi_processing(
     period_matrix = zero_matrix(K_formal.K, len(I), len(J_hodge))
     zetad = K_formal.from_str(f"zeta{degree}")
     with Pool(NCORES) as pool:
+        gamma_value_key = lambda j: tuple(
+            sorted(
+                [
+                    (formi + 1) * wi
+                    for formi, wi in zip(I[J_hodge[j]], weights)
+                ]
+            )
+        )
         tasks = [
             (
                 zetad,
                 weights,
-                I[J_hodge[i]],
-                I[j],
+                I[J_hodge[j]],
+                I[i],
                 i,
                 j,
-                gamma_values.get(
-                    tuple(
-                        (formi + 1) * wi
-                        for formi, wi in zip(I[J_hodge[i]], weights)
-                    )
-                ),
+                gamma_values.get(gamma_value_key(j)),
             )
-            for i, j in iterprod(range(len(J_hodge)), range(len(I)))
+            for i, j in iterprod(range(len(I)), range(len(J_hodge)))
         ]
         for i, j, val in tqdm(
             pool.imap_unordered(

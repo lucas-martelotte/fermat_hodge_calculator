@@ -13,6 +13,10 @@ from src.scripts import (
     get_degree_6_surface,
     get_degree_7_surface,
     get_degree_8_surface,
+    get_degree_9_surface,
+    get_degree_10_surface,
+    get_degree_11_surface,
+    get_degree_12_surface
 )
 from src.hodge_calculator import BasicHodgeCalculator
 from time import perf_counter
@@ -28,7 +32,12 @@ start_time = perf_counter()
 # X, calculator = get_degree_5_surface((5, 5, 5, 5))
 # X, calculator = get_degree_6_surface((6, 6, 6, 6))
 # X, calculator = get_degree_7_surface((7, 7, 7, 7))
-X, calculator = get_degree_8_surface((8, 8, 8, 8))
+# X, calculator = get_degree_8_surface((8, 8, 8, 8))
+# X, calculator = get_degree_9_surface((9, 9, 9, 9))
+# X, calculator = get_degree_11_surface((11, 11, 11, 11))
+X, calculator = get_degree_12_surface((12, 12, 12, 12))
+
+exit()
 
 
 R_formal = X.formal_polynomial_ring

@@ -16,7 +16,7 @@ from src.scripts import (
     get_degree_9_surface,
     get_degree_10_surface,
     get_degree_11_surface,
-    get_degree_12_surface
+    get_degree_12_surface,
 )
 from src.hodge_calculator import BasicHodgeCalculator
 from time import perf_counter
@@ -37,15 +37,14 @@ start_time = perf_counter()
 # X, calculator = get_degree_11_surface((11, 11, 11, 11))
 X, calculator = get_degree_12_surface((12, 12, 12, 12))
 
-exit()
 
+# R_formal = X.formal_polynomial_ring
+# K_formal = X.formal_base_field
+# zetad = K_formal.K.gen()
 
-R_formal = X.formal_polynomial_ring
-K_formal = X.formal_base_field
-zetad = K_formal.K.gen()
 
 periods = calculator.get_period_matrix_of_primitive_hodge_cycles()
-rank = calculator.get_rank_of_primitive_hodge_cycles()
+# rank = calculator.get_rank_of_primitive_hodge_cycles()
 # print(periods)
 
 # end_time = perf_counter()

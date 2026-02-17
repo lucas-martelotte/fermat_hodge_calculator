@@ -14,7 +14,7 @@ def get_degree_10_surface(
     assert len(exps) == 4
     assert all(degree % e == 0 for e in exps)
     assert lcm(*exps) == degree
-    K_formal = FormalCyclotomicField(9)
+    K_formal = FormalCyclotomicField(10)
     K = K_formal.K
     R_formal = PolynomialRingOverFormalNumberField(
         K_formal, ["x0", "x1", "x2", "x3"]

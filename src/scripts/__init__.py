@@ -7,3 +7,4 @@ from .degree_7_surfaces import get_degree_7_surface
 from .degree_8_surfaces import get_degree_8_surface
 from .degree_9_surfaces import get_degree_9_surface
 from .degree_10_surfaces import get_degree_10_surface
+from .degree_11_surfaces import get_degree_11_surface

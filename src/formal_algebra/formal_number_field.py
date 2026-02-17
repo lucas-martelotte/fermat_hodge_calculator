@@ -53,3 +53,9 @@ class FormalNumberField:
         ]
         self.degree = len(self.K_monomials)
         self._locals = {str(x): x for x in self.K_variables}
+
+    def from_str(self, expr: str) -> PolynomialQuotientRingElement:
+        """Parses a string expression as an element of K"""
+        local_variables = self._locals
+        local_variables["zeta2"] = -1  # exception for degree 2
+        return sage_eval(expr, locals=local_variables)

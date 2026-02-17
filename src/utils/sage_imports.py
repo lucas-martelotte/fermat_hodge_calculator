@@ -43,7 +43,10 @@ from sage.matrix.matrix_generic_dense import Matrix_generic_dense
 from sage.matrix.matrix_integer_dense import Matrix_integer_dense
 from sage.matrix.matrix_rational_dense import Matrix_rational_dense
 from sage.matrix.matrix_symbolic_dense import Matrix_symbolic_dense
-from sage.rings.number_field.number_field import NumberField, NumberField_absolute
+from sage.rings.number_field.number_field import (
+    NumberField,
+    NumberField_absolute,
+)
 from sage.rings.number_field.number_field_element import (
     NumberFieldElement,
     NumberFieldElement_absolute,
@@ -55,12 +58,18 @@ from sage.rings.polynomial.multi_polynomial_element import (
     MPolynomial_polydict,
 )
 from sage.rings.polynomial.multi_polynomial_ideal import MPolynomialIdeal
-from sage.rings.polynomial.multi_polynomial_libsingular import MPolynomial_libsingular
+from sage.rings.polynomial.multi_polynomial_libsingular import (
+    MPolynomial_libsingular,
+)
 from sage.rings.polynomial.multi_polynomial_libsingular import (
     MPolynomialRing_libsingular,
 )
-from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_polydict_domain
-from sage.rings.polynomial.multi_polynomial_ring_base import MPolynomialRing_base
+from sage.rings.polynomial.multi_polynomial_ring import (
+    MPolynomialRing_polydict_domain,
+)
+from sage.rings.polynomial.multi_polynomial_ring_base import (
+    MPolynomialRing_base,
+)
 from sage.rings.number_field.number_field import NumberField_generic
 
 from sage.schemes.projective.projective_subscheme import (
@@ -73,4 +82,7 @@ from sage.modules.vector_integer_dense import Vector_integer_dense
 from sage.modules.vector_rational_dense import Vector_rational_dense
 from sage.rings.polynomial.polynomial_quotient_ring_element import (
     PolynomialQuotientRingElement,
+)
+from sage.rings.polynomial.polynomial_quotient_ring import (
+    PolynomialQuotientRing_generic,
 )

@@ -31,6 +31,9 @@ def get_degree_3_surface(
     # zeta4 = (2 * zeta6 - 1) / root3
     calculator = HodgeCalculator(
         X,
-        {(1, 1, 2, 2): -1 / K(3)},
+        {
+            # Lines
+            (1, 1, 2, 2): (-1 / K(3)),
+        },
     )
     return X, calculator

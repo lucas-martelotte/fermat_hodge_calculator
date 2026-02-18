@@ -41,24 +41,27 @@ def get_degree_8_surface(
     sin_18 = (1 - zeta8) * zeta16**3 / 2
     sin_28 = 1 / root2
     sin_38 = (zeta16 - zeta16**7) / 2
+    sin_48 = K(1)  # sin(pi/2) = 1
 
     K_formal.locals["zeta8"] = zeta8
 
     calculator = HodgeCalculator(
         X,
         {
-            (4, 4, 4, 4): -1 / K(4),
-            (2, 3, 4, 7): -1 / (root4of2 * 2),
-            (1, 4, 5, 6): -root4of2 / K(2),
-            (1, 4, 4, 7): -1 / (4 * sin_18),
-            (2, 4, 4, 6): -1 / (4 * sin_28),
-            (3, 4, 4, 5): -1 / (4 * sin_38),
+            # Lines
             (1, 1, 7, 7): -1 / (4 * sin_18**2),
             (2, 2, 6, 6): -1 / (4 * sin_28**2),
             (3, 3, 5, 5): -1 / (4 * sin_38**2),
+            (4, 4, 4, 4): -1 / (4 * sin_48**2),
             (1, 2, 6, 7): -1 / (4 * sin_18 * sin_28),
             (1, 3, 5, 7): -1 / (4 * sin_18 * sin_38),
+            (1, 4, 4, 7): -1 / (4 * sin_18 * sin_48),
+            (2, 4, 4, 6): -1 / (4 * sin_28 * sin_48),
             (2, 3, 5, 6): -1 / (4 * sin_28 * sin_38),
+            (3, 4, 4, 5): -1 / (4 * sin_38 * sin_48),
+            # Aoki-shioda
+            (2, 3, 4, 7): -1 / (root4of2 * 2),
+            (1, 4, 5, 6): -root4of2 / K(2),
         },
     )
 
@@ -82,8 +85,9 @@ def get_degree_8_surface(
 def get_degree_8_surface_formal_field() -> FormalNumberField:
     Kbase = PolynomialRing(QQ, ["zeta16base", "root4of2base"])
     zeta16base, root4of2base = Kbase.gens()
+    root2base = zeta16base**2 - zeta16base**6
     Kbase_equations = [
         zeta16base**8 + 1,
-        root4of2base**2 + zeta16base**6 - zeta16base**2,
+        root4of2base**2 - root2base,
     ]
     return FormalNumberField(Kbase, Kbase_equations)

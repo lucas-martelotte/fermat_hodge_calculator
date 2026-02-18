@@ -49,46 +49,57 @@ def get_degree_12_surface(
 
     K_formal.locals["zeta12"] = zeta12
 
+    """
+            (1, 3, 4, 4): -1 / (root3 * root3of2),
+            (2, 2, 3, 5): -1 / (root3 * root3of2**2),
+    """
     calculator = HodgeCalculator(
         X,
         {
+            # Lines (on degree 2)
+            (6, 6, 6, 6): -1 / K(4),
+            # Lines (on degree 3)
+            (4, 4, 8, 8): -1 / K(3),
+            # Lines (on degree 4)
+            (3, 3, 9, 9): -1 / K(2),
+            (3, 6, 6, 9): -1 / (2 * root2),
+            # Lines (on degree 6)
+            (2, 2, 10, 10): -K(1),
+            (2, 4, 8, 10): -1 / root3,
+            (2, 6, 6, 10): -1 / K(2),
+            (4, 6, 6, 8): -1 / (2 * root3),
+            # Lines ("true lines")
             (1, 1, 11, 11): -1 / (K(2) - root3),
             (1, 2, 10, 11): -root2 / (root3 - 1),
             (1, 3, 9, 11): -1 / (root3 - 1),
             (1, 4, 8, 11): -root2 / (root3 * (root3 - 1)),
-            (1, 4, 9, 10): -root12of2 / (root8of3 * rr3m1),
             (1, 5, 7, 11): -K(1),
-            (1, 5, 9, 9): -root4of3 / root2,
             (1, 6, 6, 11): -1 / (root2 * (root3 - 1)),
+            (2, 3, 9, 10): -1 / root2,
+            (2, 5, 7, 10): -root2 / (root3 + 1),
+            (3, 4, 8, 9): -1 / root6,
+            (3, 5, 7, 9): -1 / (root3 + 1),
+            (4, 5, 7, 8): -root2 / (root3 * (1 + root3)),
+            (5, 5, 7, 7): -1 / (root3 + 2),
+            (5, 6, 6, 7): -1 / (root2 * (root3 + 1)),
+            # Aoki-shioda (on degree 6)
+            (2, 6, 8, 8): -1 / (root3 * root3of2),
+            (4, 4, 6, 10): -1 / (root3 * root3of2**2),
+            # Aoki-shioda ("true aoki-shioda")
+            (1, 4, 9, 10): -root12of2 / (root8of3 * rr3m1),
+            (1, 5, 9, 9): -root4of3 / root2,
             (1, 6, 7, 10): -1 / root6of2,
             (1, 6, 8, 9): -(root4of2 * rr3p1) / (2 * root8of3),
             (1, 7, 8, 8): -root2 / root3,
-            (2, 2, 10, 10): -K(1),
             (2, 3, 8, 11): -1 / (root12of2 * root8of3 * root4of3 * rr3m1),
-            (2, 3, 9, 10): -1 / root2,
-            (2, 4, 8, 10): -1 / root3,
             (2, 5, 6, 11): -1 / (root3of2**2 * root6of2),
-            (2, 5, 7, 10): -root2 / (root3 + 1),
             (2, 5, 8, 9): -(root4of2 * root3of2**2) / (2 * root8of3 * rr3p1),
-            (2, 6, 6, 10): -1 / K(2),
-            (2, 6, 8, 8): -1 / (root3of2 * root3),
             (3, 3, 7, 11): -1 / (root2 * root4of3),
-            (3, 3, 9, 9): -1 / K(2),
             (3, 4, 6, 11): -rr3p1 / (2 * root4of6 * root8of3),
             (3, 4, 7, 10): -(root12of2 * root8of3) / (root3 * rr3p1),
-            (3, 4, 8, 9): -1 / root6,
-            (3, 5, 7, 9): -1 / (root3 + 1),
-            (3, 6, 6, 9): -1 / (2 * root2),
             (3, 6, 7, 8): -1 / (root4of6 * root8of3 * rr3p1),
             (4, 4, 5, 11): -1 / root6,
-            (4, 4, 6, 10): -1 / (root3 * root3of4),
-            (4, 4, 8, 8): -1 / K(3),
             (4, 5, 6, 9): -root4of2 / (2 * root8of3 * rr3p1),
-            (4, 5, 7, 8): -root2 / (root3 * (1 + root3)),
-            (4, 6, 6, 8): -1 / (2 * root3),
-            (5, 5, 7, 7): -1 / (root3 + 2),
-            (5, 6, 6, 7): -1 / (root2 * (root3 + 1)),
-            (6, 6, 6, 6): -1 / K(4),
         },
     )
 

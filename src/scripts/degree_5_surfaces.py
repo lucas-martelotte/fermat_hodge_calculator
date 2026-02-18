@@ -30,7 +30,7 @@ def get_degree_5_surface(
     calculator = HodgeCalculator(
         X,
         {
-            # Lines
+            # Lines ("true lines")
             (1, 2, 3, 4): -1 / root5,
             (2, 2, 3, 3): -2 / (5 + root5),
             (1, 1, 4, 4): -2 / (5 - root5),

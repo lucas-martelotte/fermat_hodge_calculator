@@ -16,7 +16,7 @@ def get_degree_10_surface(
     assert len(exps) == 4
     assert all(degree % e == 0 for e in exps)
     assert lcm(*exps) == degree
-    K_formal = FormalCyclotomicField(20)
+    K_formal = get_degree_10_surface_formal_field()
     K = K_formal.K
     R_formal = PolynomialRingOverFormalNumberField(
         K_formal, ["x0", "x1", "x2", "x3"]
@@ -52,23 +52,25 @@ def get_degree_10_surface(
     calculator = HodgeCalculator(
         X,
         {
-            # Lines
-            (1, 1, 9, 9): -1 / (4 * sin_1_10**2),
-            (2, 2, 8, 8): -1 / (4 * sin_2_10**2),
-            (3, 3, 7, 7): -1 / (4 * sin_3_10**2),
-            (4, 4, 6, 6): -1 / (4 * sin_4_10**2),
+            # Lines (on degree 2)
             (5, 5, 5, 5): -1 / (4 * sin_5_10**2),
+            # Lines (on degree 5)
+            (2, 2, 8, 8): -1 / (4 * sin_2_10**2),
+            (4, 4, 6, 6): -1 / (4 * sin_4_10**2),
+            (2, 4, 6, 8): -1 / (4 * sin_2_10 * sin_4_10),
+            # Lines ("true lines")
+            (1, 1, 9, 9): -1 / (4 * sin_1_10**2),
+            (3, 3, 7, 7): -1 / (4 * sin_3_10**2),
             (1, 2, 8, 9): -1 / (4 * sin_1_10 * sin_2_10),
             (1, 3, 7, 9): -1 / (4 * sin_1_10 * sin_3_10),
             (1, 4, 6, 9): -1 / (4 * sin_1_10 * sin_4_10),
             (1, 5, 5, 9): -1 / (4 * sin_1_10 * sin_5_10),
             (2, 3, 7, 8): -1 / (4 * sin_2_10 * sin_3_10),
-            (2, 4, 6, 8): -1 / (4 * sin_2_10 * sin_4_10),
             (2, 5, 5, 8): -1 / (4 * sin_2_10 * sin_5_10),
             (3, 4, 6, 7): -1 / (4 * sin_3_10 * sin_4_10),
             (3, 5, 5, 7): -1 / (4 * sin_3_10 * sin_5_10),
             (4, 5, 5, 6): -1 / (4 * sin_4_10 * sin_5_10),
-            # Aoki-shiodaS
+            # Aoki-shioda
             (2, 2, 7, 9): -1 / (2 * root5of2 * sin_2_10),
             (1, 5, 6, 8): -1 / (2 * root5of2 * sin_2_10),
             (2, 4, 5, 9): -1 / (2 * root5of2**4 * sin_2_10),

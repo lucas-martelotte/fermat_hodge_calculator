@@ -1,28 +1,15 @@
-from src.utils.sage_imports import parallel
-from time import sleep
+# type: ignore
+from sage.all import *
 
+K = CyclotomicField(11)
+R = PolynomialRing(K, ["x"])
+(x,) = R.gens()
+z11 = exp(2 * pi * I / 11).n()
 
-@parallel(ncpus=2)
-def f(n: int) -> int:
-    for i in range(10000000):
-        pass
-    return n**2
-
-
-def g(n: int) -> int:
-    for i in range(10000000):
-        pass
-    return n**2
-
-
-N = 1000000
-
-print("a")
-y = f([(i,) for i in range(N)])  # type: ignore
-# print(list(y))
-
-print("b")
-y = [g(i) for i in range(N)]
-# print(y)
-
-print("c")
+P = 1024 * x**5 - 704 * x**3 - 176 * x**2 + 44 * x + 11  # some polynomial
+roots = P.roots()
+for root, mult in roots:
+    print()
+    print(root)
+    print(sage_eval(str(root), locals={"zeta11": z11}))
+    print()

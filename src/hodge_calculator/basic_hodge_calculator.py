@@ -55,6 +55,16 @@ class BasicHodgeCalculator(JsonManager):
             )
         return self._multi_indexes
 
+    def weighted_sum_of_index(self, b: list[int], c: int = 1) -> Rat:
+        """
+        Compute the value of 'A_{cb}', i.e. the summation given by
+        <c(b_0+1)/m_0> + ... + <c(b_{n+1}+1)/m_{m+1}> where <x> stands for
+        the fractional part operator (which since b is a tuple of
+        positive integers, is just taking b_i modulo m_i).
+        """
+        ms = self.variety.exps
+        return sum([Rat((c * (bi + 1)) % mi / mi) for bi, mi in zip(b, ms)])
+
     def __compute_basis_of_primitive_hodge_cycles(self) -> dict[str, Any]:
         d, n = self.variety.degree, self.variety.dimension
         k = n // 2 + 1
@@ -85,32 +95,6 @@ class BasicHodgeCalculator(JsonManager):
                 for row in basis_of_primitive_hodge_cycles
             ],
         }
-
-    def simple_pairing(
-        self, zetad: NumberFieldElement, form: list[int], cycle: list[int]
-    ) -> NumberFieldElement:
-        """
-        Returns a simplified version of the cycle-form pairing (given by
-        integration) which only serves the purpose of determining if the
-        pairing is equal to zero or not.
-        """
-        n = self.variety.dimension
-        ws = self.variety.weights
-        return prod(
-            zetad ** (ws[i] * (cycle[i] + 1) * (form[i] + 1))
-            - zetad ** (ws[i] * cycle[i] * (form[i] + 1))
-            for i in range(n + 2)
-        )
-
-    def weighted_sum_of_index(self, b: list[int], c: int = 1) -> Rat:
-        """
-        Compute the value of 'A_{cb}', i.e. the summation given by
-        <c(b_0+1)/m_0> + ... + <c(b_{n+1}+1)/m_{m+1}> where <x> stands for
-        the fractional part operator (which since b is a tuple of
-        positive integers, is just taking b_i modulo m_i).
-        """
-        ms = self.variety.exps
-        return sum([Rat((c * (bi + 1)) % mi / mi) for bi, mi in zip(b, ms)])
 
     # =============== #
     # === GETTERS === #

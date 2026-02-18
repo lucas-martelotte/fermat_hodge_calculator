@@ -29,7 +29,7 @@ def get_degree_2_surface(
     calculator = HodgeCalculator(
         X,
         {
-            # Lines
+            # Lines ("true lines")
             (1, 1, 1, 1): (-1 / K(4)),
         },
     )

@@ -16,17 +16,18 @@ import json
 
 start_time = perf_counter()
 # ======================= #
+d = 7
 
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((3, 3, 3, 3))
+X, calculator = hodge_calculator_factory.create((d, d, d, d))
 factory = LineFactory(X)
-lines = factory.get_hodge_cycles()
+# lines = factory.get_hodge_cycles()
 # print(len(lines))
 # for line_id, line in lines.items():
 #    print(line_id)
-# calculator.compute_periods_from_factory(factory, "lines")
-line_data = calculator.get_hodge_cycle_factory_data("lines")
-print(line_data["coordinates"])
+calculator.compute_periods_from_hodge_cycle_factory(factory, "lines")
+# line_data = calculator.get_hodge_cycle_factory_data("lines")
+# print(line_data["coordinates"])
 
 
 # ======================= #

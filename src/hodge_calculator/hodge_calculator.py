@@ -3,6 +3,7 @@ from .basic_hodge_calculator import BasicHodgeCalculator
 from ..utils.sage_imports import (
     PolynomialQuotientRingElement,
     PolynomialQuotientRing_generic,
+    MPolynomial_element,
     Matrix_rational_dense,
     Matrix_integer_dense,
     Matrix_generic_dense,
@@ -24,7 +25,10 @@ from itertools import product as iterprod
 from ..utils.settings import NCORES
 from multiprocessing import Pool
 from ..formal_algebra import FormalNumberField
-from ..hodge_cycles import HodgeCycleFactory
+from ..hodge_cycles import (
+    HodgeCycleFactory,
+    AlgebraicPrimePrimitiveHodgeCycle,
+)
 
 
 class HodgeCalculator(BasicHodgeCalculator):
@@ -124,9 +128,9 @@ class HodgeCalculator(BasicHodgeCalculator):
             ),
         }
 
-    # ======================= #
-    # === FUNCTIONALITIES === #
-    # ======================= #
+    # ============================================== #
+    # === INTERACTION WITH HODGE CYCLE FACTORIES === #
+    # ============================================== #
 
     def compute_periods_from_hodge_cycle_factory(
         self,
@@ -149,20 +153,22 @@ class HodgeCalculator(BasicHodgeCalculator):
         ids, cycles = list(id_to_cycle.keys()), list(id_to_cycle.values())
         I = self.multi_indexes
         J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
-        period_matrix = Matrix(nf, len(cycles), len(J_hodge), 0)
         ms = self.variety.exps
-        for i, j in tqdm(
-            iterprod(range(len(cycles)), range(len(J_hodge))),
-            desc="Computing periods",
-            total=len(cycles) * len(J_hodge),
-        ):
-            form = I[J_hodge[j]]
-            form_poly = prod([xi**bi for xi, bi in zip(xs, form)])
-            A_form = self.weighted_sum_of_index(form)
-            period = cycles[i].pairing(form_poly)
-            # period /= prod(-1 + Rat(A_form / k) for k in range(1, A_form, 1))
-            period *= prod(ms)
-            period_matrix[i, j] = period
+        # ======================================= #
+        period_matrix = mp_get_hodge_cycle_factory_period_matrix(
+            nf, I, J_hodge, cycles, ms, xs
+        )
+        # period_matrix = Matrix(nf, len(cycles), len(J_hodge), 0)
+        # for i, j in tqdm(
+        #    iterprod(range(len(cycles)), range(len(J_hodge))),
+        #    desc="Computing periods",
+        #    total=len(cycles) * len(J_hodge),
+        # ):
+        #    form = I[J_hodge[j]]
+        #    form_poly = prod([xi**bi for xi, bi in zip(xs, form)])
+        #    period = cycles[i].pairing(form_poly) * prod(ms)
+        #    period_matrix[i, j] = period
+        # ======================================= #
         cycle_coords = self.solve_from_periods(period_matrix)
         data = {
             "rank": int(cycle_coords.rank()),
@@ -172,24 +178,6 @@ class HodgeCalculator(BasicHodgeCalculator):
             "coordinates": sage_matrix_map(str, cycle_coords),
         }
         self.write_data_on_json(filename, data)
-
-    def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
-        """
-        Loads the data exported from the function named
-        'compute_periods_from_hodge_cycle_factory'.
-        """
-        data = self.get_json(filename)
-        nf = self.variety.base_field
-        eval = self.variety.formal_base_field.from_str
-        period_matrix = Matrix(
-            nf, [[eval(p) for p in row] for row in data["period_matrix"]]
-        )
-        return {
-            "rank": data["rank"],
-            "cycle_ids": data["cycle_ids"],
-            "period_matrix": period_matrix,
-            "coordinates": Matrix(ZZ, data["coordinates"]),
-        }
 
     def solve_from_periods(
         self, period_matrix_to_solve: Matrix_generic_dense
@@ -210,6 +198,24 @@ class HodgeCalculator(BasicHodgeCalculator):
             hodge_period_matrix, period_matrix_to_solve
         ).T
         return Matrix(ZZ, period_coords)  # Solution must lie inside ZZ!!
+
+    def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
+        """
+        Loads the data exported from the function named
+        'compute_periods_from_hodge_cycle_factory'.
+        """
+        data = self.get_json(filename)
+        nf = self.variety.base_field
+        eval = self.variety.formal_base_field.from_str
+        period_matrix = Matrix(
+            nf, [[eval(p) for p in row] for row in data["period_matrix"]]
+        )
+        return {
+            "rank": data["rank"],
+            "cycle_ids": data["cycle_ids"],
+            "period_matrix": period_matrix,
+            "coordinates": Matrix(ZZ, data["coordinates"]),
+        }
 
     # =============== #
     # === GETTERS === #
@@ -430,3 +436,56 @@ def mp_get_cup_pairing_matrix_of_forms_at_infty(
         ):
             cup_pairing_matrix[i, j] = val
     return cup_pairing_matrix
+
+
+# ======================================================================== #
+# === MULTIPROCESSING SCRIPT FOR COMPUTING HODGE CYCLE FACTORY PERIODS === #
+# ======================================================================== #
+
+
+def mp_hodge_cycle_factory_period_matrix_worker(
+    args: tuple[Any, ...],
+) -> tuple[int, int, NumberFieldElement]:
+    i, j, cycle, form_poly, ms = args
+    return i, j, cycle.pairing(form_poly) * prod(ms)
+
+
+def mp_get_hodge_cycle_factory_period_matrix(
+    K: PolynomialQuotientRing_generic,
+    I: Sequence[tuple[int, ...]],
+    J_hodge: Sequence[int],
+    cycles: list[AlgebraicPrimePrimitiveHodgeCycle],
+    ms: tuple[int, ...],
+    xs: tuple[MPolynomial_element, ...],
+) -> Matrix_generic_dense:
+    period_matrix = zero_matrix(K, len(cycles), len(J_hodge))
+    with Pool(NCORES) as pool:
+        form = lambda j: I[J_hodge[j]]
+        form_poly = lambda j: prod([xi**bi for xi, bi in zip(xs, form(j))])
+        tasks = [
+            (i, j, cycles[i], form_poly(j), ms)
+            for i, j in iterprod(range(len(cycles)), range(len(J_hodge)))
+        ]
+        for i, j, val in tqdm(
+            pool.imap_unordered(
+                mp_hodge_cycle_factory_period_matrix_worker,
+                tasks,
+                chunksize=max(len(tasks) // (10 * NCORES), 1),
+            ),
+            desc="Assembling hodge cycle factory period matrix",
+            total=len(tasks),
+        ):
+            period_matrix[i, j] = val
+    return period_matrix
+
+
+# period_matrix = Matrix(nf, len(cycles), len(J_hodge), 0)
+# for i, j in tqdm(
+#    iterprod(range(len(cycles)), range(len(J_hodge))),
+#    desc="Computing periods",
+#    total=len(cycles) * len(J_hodge),
+# ):
+#    form = I[J_hodge[j]]
+#    form_poly = prod([xi**bi for xi, bi in zip(xs, form)])
+#    period = cycles[i].pairing(form_poly) * prod(ms)
+#    period_matrix[i, j] = period

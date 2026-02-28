@@ -109,6 +109,8 @@ GAMMA_DATABASE.add((2, 2), GammaStructure(K_formal, gamma_values, embedding))
 
 # === degree 3 surface === #
 K_formal = FormalCyclotomicField(3)
+zeta3 = K_formal.K.gen()
+K_formal.locals["zeta6"] = -(zeta3**2)
 gamma_values = {(1, 1, 2, 2): (-1 / K_formal.K(3))}
 embedding_locals = {"zeta3": exp(2 * pi * I / 3)}
 embedding: Callable[[str], complex] = lambda expr: complex(
@@ -141,6 +143,7 @@ K_formal = FormalCyclotomicField(5)
 zeta5 = K_formal.K.gen()
 root5 = -(2 * zeta5**3 + 2 * zeta5**2 + 1)
 K_formal.locals["root5"] = root5
+K_formal.locals["zeta10"] = -(zeta5**3)
 gamma_values = {
     # Lines ("true lines")
     (1, 2, 3, 4): -1 / root5,
@@ -193,6 +196,7 @@ GAMMA_DATABASE.add((2, 6), GammaStructure(K_formal, gamma_values, embedding))
 # === degree 7 surface === #
 K_formal = FormalCyclotomicField(7)
 zeta7 = K_formal.K(K_formal.from_str("zeta7"))
+K_formal.locals["zeta14"] = -(zeta7**4)
 # sin_a7b7 means sin(a*pi/7) * sin(b*pi/7)
 sin_1717 = (2 - zeta7**6 - zeta7) / 4
 sin_2727 = (2 - zeta7**5 - zeta7**2) / 4
@@ -271,6 +275,7 @@ Kbase_equations = [
 ]
 K_formal = FormalNumberField(Kbase, Kbase_equations)
 zeta9 = K_formal.K(K_formal.from_str("zeta9"))
+K_formal.locals["zeta18"] = -(zeta9**5)
 root3of3 = K_formal.K(K_formal.from_str("root3of3"))
 sin_1919 = (2 + zeta9**5 + zeta9**2 - zeta9) / 4
 sin_1929 = (1 + zeta9**3 - zeta9 - zeta9**2) * zeta9**3 / 4
@@ -368,6 +373,7 @@ GAMMA_DATABASE.add((2, 10), GammaStructure(K_formal, gamma_values, embedding))
 # === degree 11 surface === #
 K_formal = FormalCyclotomicField(11)
 zeta11 = K_formal.K.gen()
+K_formal.locals["zeta22"] = -(zeta11**6)
 # sin_a_11_b_11 means sin(a*pi/11)*sin(b*pi/11)
 sin_1_11_1_11 = (2 - zeta11**1 - zeta11**10) / 4
 sin_2_11_2_11 = (2 - zeta11**2 - zeta11**9) / 4

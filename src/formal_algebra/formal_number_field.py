@@ -60,3 +60,38 @@ class FormalNumberField:
         local_variables = self.locals
         local_variables["zeta2"] = -1  # exception for degree 2
         return sage_eval(expr, locals=local_variables)
+
+    def vector(
+        self, x: PolynomialQuotientRingElement
+    ) -> Vector_rational_dense:
+        """
+        Writes an element x in the quotient as a vector in the
+        basis of monomials indexed by self.monomial_indexes.
+        """
+        x_lift, mons = x.lift(), self.Kbase_monomials
+        return vector([x_lift.monomial_coefficient(mon) for mon in mons])
+
+    def convert_to_rational_horizontally_blocked_matrix(
+        self, M: Matrix_generic_dense
+    ) -> Matrix_rational_dense:
+        """
+        Receives a matrix M with entries in K and converts it to a
+        blocked matrix [M_1 ... M_d], where d = self.degree, with
+        rational entries. The (i,j)-th entry of the block M_k has
+        the k-th coefficient of M[i,j] in the Q-basis of K indexed
+        by self.monomial_indexes.
+        """
+        M_rat = zero_matrix(QQ, M.nrows(), M.ncols() * self.degree)
+        for i, j in iterprod(range(M.nrows()), range(M.ncols())):
+            curr_vec = self.vector(M[i, j])
+            for k in range(self.degree):
+                M_rat[i, j + M.ncols() * k] = curr_vec[k]
+        return M_rat
+
+    def solve_left_in_rationals(
+        self, M: Matrix_generic_dense, V: Matrix_generic_dense
+    ) -> Matrix_rational_dense:
+        """Solves XM = V, where X is a rational matrix."""
+        M_rat = self.convert_to_rational_horizontally_blocked_matrix(M)
+        V_rat = self.convert_to_rational_horizontally_blocked_matrix(V)
+        return M_rat.solve_left(V_rat)

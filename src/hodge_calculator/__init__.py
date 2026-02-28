@@ -1,2 +1,3 @@
+from .hodge_calculator_factory import HodgeCalculatorFactory
 from .basic_hodge_calculator import BasicHodgeCalculator
 from .hodge_calculator import HodgeCalculator

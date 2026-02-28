@@ -1,4 +1,4 @@
-from ..hodge_calculator import BasicHodgeCalculator, HodgeCalculator
+from .hodge_calculator import BasicHodgeCalculator, HodgeCalculator
 from ..diagonal_variety import EvenDimensionalDiagonalVariety
 from ..formal_algebra import (
     PolynomialRingOverFormalNumberField,

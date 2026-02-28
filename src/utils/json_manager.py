@@ -29,6 +29,18 @@ class JsonManager:
         self.check_folder()
         return exists(self.savepath + f"/{json_file}.json")
 
+    def write_data_on_json(self, filename: str, data: dict[str, Any]) -> Any:
+        with open(f"{self.savepath}/{filename}.json", "w") as f:
+            json.dump(data, f)
+
+    def get_json(self, filename: str) -> dict[str, Any]:
+        self.check_folder()
+        if not self._check_json(filename):
+            raise Exception("File does not exist!")
+        with open(f"{self.savepath}/{filename}.json", "r") as f:
+            data = json.load(f)
+        return data
+
     def get_data_from_json(self, filename: str, key: str) -> Any:
         """
         Retrieves from the json file 'filename.json' the

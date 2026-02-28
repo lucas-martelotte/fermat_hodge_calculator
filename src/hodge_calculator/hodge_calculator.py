@@ -4,6 +4,7 @@ from ..utils.sage_imports import (
     PolynomialQuotientRingElement,
     PolynomialQuotientRing_generic,
     Matrix_rational_dense,
+    Matrix_integer_dense,
     Matrix_generic_dense,
     NumberFieldElement,
     identity_matrix,
@@ -14,6 +15,7 @@ from ..utils.sage_imports import (
     prod,
     Rat,
     QQ,
+    ZZ,
 )
 from ..utils.auxiliary import sage_matrix_map
 from typing import Mapping, Sequence, Any
@@ -22,6 +24,7 @@ from itertools import product as iterprod
 from ..utils.settings import NCORES
 from multiprocessing import Pool
 from ..formal_algebra import FormalNumberField
+from ..hodge_cycles import HodgeCycleFactory
 
 
 class HodgeCalculator(BasicHodgeCalculator):
@@ -120,6 +123,93 @@ class HodgeCalculator(BasicHodgeCalculator):
                 str, intersection_matrix
             ),
         }
+
+    # ======================= #
+    # === FUNCTIONALITIES === #
+    # ======================= #
+
+    def compute_periods_from_hodge_cycle_factory(
+        self,
+        factory: HodgeCycleFactory,
+        filename: str,
+        override: bool = False,
+    ) -> None:
+        """
+        Computes the period vector of each cycle produced by
+        the input of cycle factory and compiles it all in a
+        single matrix and, together with some additional
+        info, exports it to memory.
+        """
+        self.check_folder()
+        if self._check_json(filename) and not override:
+            return  # File already exists
+        nf = self.variety.base_field
+        xs = self.variety.polynomial_variables
+        id_to_cycle = factory.get_hodge_cycles()
+        ids, cycles = list(id_to_cycle.keys()), list(id_to_cycle.values())
+        I = self.multi_indexes
+        J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
+        period_matrix = Matrix(nf, len(cycles), len(J_hodge), 0)
+        ms = self.variety.exps
+        for i, j in tqdm(
+            iterprod(range(len(cycles)), range(len(J_hodge))),
+            desc="Computing periods",
+            total=len(cycles) * len(J_hodge),
+        ):
+            form = I[J_hodge[j]]
+            form_poly = prod([xi**bi for xi, bi in zip(xs, form)])
+            A_form = self.weighted_sum_of_index(form)
+            period = cycles[i].pairing(form_poly)
+            # period /= prod(-1 + Rat(A_form / k) for k in range(1, A_form, 1))
+            period *= prod(ms)
+            period_matrix[i, j] = period
+        cycle_coords = self.solve_from_periods(period_matrix)
+        data = {
+            "rank": int(cycle_coords.rank()),
+            "number_of_cycles": len(ids),
+            "cycle_ids": ids,
+            "period_matrix": sage_matrix_map(str, period_matrix),
+            "coordinates": sage_matrix_map(str, cycle_coords),
+        }
+        self.write_data_on_json(filename, data)
+
+    def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
+        """
+        Loads the data exported from the function named
+        'compute_periods_from_hodge_cycle_factory'.
+        """
+        data = self.get_json(filename)
+        nf = self.variety.base_field
+        eval = self.variety.formal_base_field.from_str
+        period_matrix = Matrix(
+            nf, [[eval(p) for p in row] for row in data["period_matrix"]]
+        )
+        return {
+            "rank": data["rank"],
+            "cycle_ids": data["cycle_ids"],
+            "period_matrix": period_matrix,
+            "coordinates": Matrix(ZZ, data["coordinates"]),
+        }
+
+    def solve_from_periods(
+        self, period_matrix_to_solve: Matrix_generic_dense
+    ) -> Matrix_integer_dense:
+        """
+        The input matrix's (i,j)-th coordinate should be the period
+        of some to-be-discovered i-th primitive hodge cycle with the
+        j-th form from 'form_idx_at_infty_in_middle_hodge_comp'. This
+        function uses some linear algebra to discover those cycles,
+        and then returns a matrix whose i-th column is the i-th cycle
+        writen on the standard Z-basis of primitive hodge cycles.
+        """
+        hodge_period_matrix = (
+            self.get_period_matrix_of_primitive_hodge_cycles()
+        )
+        K_formal = self.variety.formal_base_field
+        period_coords = K_formal.solve_left_in_rationals(
+            hodge_period_matrix, period_matrix_to_solve
+        ).T
+        return Matrix(ZZ, period_coords)  # Solution must lie inside ZZ!!
 
     # =============== #
     # === GETTERS === #

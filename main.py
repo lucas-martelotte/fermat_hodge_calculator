@@ -16,7 +16,7 @@ import json
 
 start_time = perf_counter()
 # ======================= #
-d = 7
+d = 8
 
 hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((d, d, d, d))

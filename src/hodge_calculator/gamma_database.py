@@ -180,7 +180,7 @@ gamma_values = {
     (1, 2, 4, 5): -1 / root3,
     (1, 3, 3, 5): -1 / K_formal.K(2),
     (2, 3, 3, 4): -1 / (2 * root3),
-    # Aoki-shioda
+    # Aoki-shioda (24 after permutation)
     (1, 3, 4, 4): -1 / (root3 * root3of2),
     (2, 2, 3, 5): -1 / (root3 * root3of2**2),
 }
@@ -253,7 +253,7 @@ gamma_values = {
     (1, 4, 4, 7): -1 / (4 * sin_18 * sin_48),
     (2, 3, 5, 6): -1 / (4 * sin_28 * sin_38),
     (3, 4, 4, 5): -1 / (4 * sin_38 * sin_48),
-    # Aoki-shioda
+    # Aoki-shioda (48 after permutation)
     (2, 3, 4, 7): -1 / (root4of2 * 2),
     (1, 4, 5, 6): -root4of2 / K_formal.K(2),
 }
@@ -300,7 +300,7 @@ gamma_values = {
     (2, 3, 6, 7): -1 / (4 * sin_2939),
     (2, 4, 5, 7): -1 / (4 * sin_2949),
     (3, 4, 5, 6): -1 / (4 * sin_3949),
-    # Aoki-shioda
+    # Aoki-shioda (48 after permutation)
     (1, 4, 6, 7): -1 / root3of3,
     (2, 3, 5, 8): -1 / root3of3**2,
 }
@@ -351,7 +351,7 @@ gamma_values = {
     (3, 4, 6, 7): -1 / (4 * sin_3_10 * sin_4_10),
     (3, 5, 5, 7): -1 / (4 * sin_3_10 * sin_5_10),
     (4, 5, 5, 6): -1 / (4 * sin_4_10 * sin_5_10),
-    # Aoki-shioda
+    # Aoki-shioda (144 after permutation)
     (2, 2, 7, 9): -1 / (2 * root5of2 * sin_2_10),
     (1, 5, 6, 8): -1 / (2 * root5of2 * sin_2_10),
     (2, 4, 5, 9): -1 / (2 * root5of2**4 * sin_2_10),

@@ -110,13 +110,12 @@ def signed_tuples(n, l):
             yield tuple(t)
 
 
-def count_fixed_permutations(a: list) -> int:
+def count_fixed_permutations(a: tuple) -> int:
     """
     Given a list a = [a1, ..., an], returns the number of
     permutations of a that leaves a unchanged.
     """
     cnt = Counter(a)
-    n = len(a)
     res = 1  # factorial(n)
     for c in cnt.values():
         res *= factorial(c)

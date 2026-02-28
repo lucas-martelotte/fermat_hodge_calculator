@@ -50,9 +50,23 @@ start_time = perf_counter()
 # print(periods)
 
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((9, 9, 9, 9))
 
+
+print("Starting degree 10")
+X, calculator = hodge_calculator_factory.create((10, 10, 10, 10))
 M = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
+print("Computed for degree 10")
+
+print("Starting degree 11")
+X, calculator = hodge_calculator_factory.create((11, 11, 11, 11))
+M = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
+print("Computed for degree 11")
+
+print("Starting degree 12")
+X, calculator = hodge_calculator_factory.create((12, 12, 12, 12))
+M = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
+print("Computed for degree 12")
+
 
 
 # print(calculator.get_rank_of_primitive_hodge_cycles())

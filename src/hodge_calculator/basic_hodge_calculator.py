@@ -55,7 +55,7 @@ class BasicHodgeCalculator(JsonManager):
             )
         return self._multi_indexes
 
-    def weighted_sum_of_index(self, b: list[int], c: int = 1) -> Rat:
+    def weighted_sum_of_index(self, b: tuple[int, ...], c: int = 1) -> Rat:
         """
         Compute the value of 'A_{cb}', i.e. the summation given by
         <c(b_0+1)/m_0> + ... + <c(b_{n+1}+1)/m_{m+1}> where <x> stands for

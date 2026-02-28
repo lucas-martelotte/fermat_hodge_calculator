@@ -48,9 +48,6 @@ class GammaDatabase:  # TODO Fix issue with singleton metaclass
         self._database: dict[tuple[int, int], GammaStructure] = {}
         self._check_gamma_values = check_gamma_values
 
-    def weighted_sum_of_index(self, d: int, b: list[int], c: int = 1) -> Rat:
-        return sum([Rat((c * (bi + 1)) % d / d) for bi in b])
-
     def gamma_product(
         self, gamma_tuple: tuple[int, ...], denominator: int
     ) -> complex:

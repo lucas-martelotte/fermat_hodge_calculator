@@ -12,8 +12,8 @@ class EvenDimensionalDiagonalVariety:
         formal_polynomial_ring: PolynomialRingOverFormalNumberField,
         exps: tuple[int, ...],
     ) -> None:
-        assert len(exps) % 2 == 0 and len(exps) > 0
         self.exps = exps
+        assert len(exps) % 2 == 0 and len(exps) > 0
         self.degree = lcm(*exps)
         self.weights = tuple([self.degree // e for e in exps])
         self.dimension = len(exps) - 2

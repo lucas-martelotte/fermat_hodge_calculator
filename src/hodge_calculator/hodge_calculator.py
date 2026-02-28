@@ -3,12 +3,17 @@ from .basic_hodge_calculator import BasicHodgeCalculator
 from ..utils.sage_imports import (
     PolynomialQuotientRingElement,
     PolynomialQuotientRing_generic,
+    Matrix_rational_dense,
     Matrix_generic_dense,
     NumberFieldElement,
+    identity_matrix,
     zero_matrix,
     factorial,
+    binomial,
     Matrix,
     prod,
+    Rat,
+    QQ,
 )
 from ..utils.auxiliary import sage_matrix_map
 from typing import Mapping, Sequence, Any
@@ -37,7 +42,8 @@ class HodgeCalculator(BasicHodgeCalculator):
         )
         self.file_to_computation.update(
             {
-                "periods_of_primitive_hodge_cycles": self.__compute_periods_of_primitive_hodge_cycles
+                "periods_of_primitive_hodge_cycles": self.__compute_periods_of_primitive_hodge_cycles,
+                "intersection_of_primitive_hodge_cycles": self.__compute_intersection_of_primitive_hodge_cycles,
             }
         )
 
@@ -56,20 +62,62 @@ class HodgeCalculator(BasicHodgeCalculator):
         full_period_mat = zero_matrix(
             self.variety.base_field, len(I), len(J_hodge)
         )
-        full_period_mat = (
-            get_period_matrix_of_prim_hodge_cycles_multi_processing(
-                self.variety.formal_base_field,
-                self.variety.weights,
-                self.variety.degree,
-                I,
-                J_hodge,
-                self.gamma_values,
-            )
+        full_period_mat = mp_get_period_matrix_of_prim_hodge_cycles(
+            self.variety.formal_base_field,
+            self.variety.weights,
+            self.variety.degree,
+            I,
+            J_hodge,
+            self.gamma_values,
         )
         hodge_period_mat = (full_period_mat.T * hodge_cycle_basis).T
         return {
             "period_matrix_of_primitive_hodge_cycles": sage_matrix_map(
                 str, hodge_period_mat
+            ),
+        }
+
+    def __compute_intersection_of_primitive_hodge_cycles(self):
+        """
+        Computes the cup pairing matrix, in which the (i,j)-th entry
+        is the cup pairing (given by integrating the cup product) of the
+        i-th and j-th n-forms at infinity.
+
+        Also computes the dual period matrix, in which the i-th row contains
+        the coefficients of the poincare dual of the i-th element of the
+        basis of primitive hodge cycles when written as a linear combination
+        of the forms in 'indexes_of_forms_for_computing_primitive_hodge_periods'.
+        """
+        I = self.multi_indexes
+        J_inf = self.get_form_idxs_at_infty()
+        J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
+        period_matrix = self.get_period_matrix_of_primitive_hodge_cycles()
+        full_cup_pairing_matrix = mp_get_cup_pairing_matrix_of_forms_at_infty(
+            I, J_inf, self.variety.exps, self.variety.degree
+        )
+        N, rel_idxs = len(J_hodge), [J_inf.index(j) for j in J_hodge]
+        cup = lambda i, j: full_cup_pairing_matrix[rel_idxs[i]][rel_idxs[j]]
+        cup_pairing_matrix_at_middle_hodge_comp = Matrix(QQ, N, N, cup)
+        cup_inv = cup_pairing_matrix_at_middle_hodge_comp.inverse()
+        dual_period_matrix = period_matrix * cup_inv
+        intersection_matrix = (
+            dual_period_matrix
+            * cup_pairing_matrix_at_middle_hodge_comp
+            * dual_period_matrix.T
+        )  # (DUAL) PERIOD MATRIX IS SLOWEST BECAUSE NF
+        return {
+            "cup_pairing_matrix_of_forms_at_infinity": [
+                [str(p) for p in row] for row in full_cup_pairing_matrix
+            ],
+            "cup_pairing_matrix_of_forms_at_infinity_inside_the_middle_hodge_comp": [
+                [str(p) for p in row]
+                for row in cup_pairing_matrix_at_middle_hodge_comp
+            ],
+            "dual_period_matrix_of_primitive_hodge_cycles": sage_matrix_map(
+                str, dual_period_matrix
+            ),
+            "intersection_matrix_of_primitive_hodge_cycles": sage_matrix_map(
+                str, intersection_matrix
             ),
         }
 
@@ -95,13 +143,75 @@ class HodgeCalculator(BasicHodgeCalculator):
             [[eval(p) for p in row] for row in matrix_raw],
         )
 
+    def get_cup_pairing_matrix_of_forms_at_infty(
+        self,
+    ) -> Matrix_rational_dense:
+        """
+        Returns the full gram matrix of the cup pairing of forms at infinity,
+        whose (i,j)-th coordinate corresponds to the integration of the cup
+        product of the i-th and j-th forms at infinity.
+        """
+        matrix_raw = self.get_data_from_json(
+            "intersection_of_primitive_hodge_cycles",
+            "cup_pairing_matrix_of_forms_at_infinity",
+        )
+        return Matrix(QQ, [[Rat(p) for p in row] for row in matrix_raw])
 
-# ============================== #
-# === MULTIPROCESSING SCRIPT === #
-# ============================== #
+    def get_cup_pairing_matrix_of_forms_at_infty_in_middle_hodge_comp(
+        self,
+    ) -> Matrix_rational_dense:
+        """
+        Returns the gram matrix of the cup pairing of forms at infinity which
+        lie inside the middle hodge component. The (i,j)-th coordinate corresponds
+        to the integration of the cup product of the i-th and j-th forms in the
+        list 'form_idxs_at_infty_in_middle_hodge_comp'.
+        """
+        matrix_raw = self.get_data_from_json(
+            "intersection_of_primitive_hodge_cycles",
+            "cup_pairing_matrix_of_forms_at_infinity_inside_the_middle_hodge_component",
+        )
+        return Matrix(QQ, [[Rat(p) for p in row] for row in matrix_raw])
+
+    def get_dual_period_matrix_of_primitive_hodge_cycles(
+        self,
+    ) -> Matrix_generic_dense:
+        """
+        Returns the dual period matrix of primitive hodge cycles, whose i-th
+        row contains the coefficients of the poincare dual of the i-th element
+        in the standard basis returned by 'get_basis_of_primitive_hodge_cycles'
+        """
+        nf = self.variety.base_field
+        eval = self.variety.formal_base_field.from_str
+        matrix_raw = self.get_data_from_json(
+            "intersection_of_primitive_hodge_cycles",
+            "dual_period_matrix_of_primitive_hodge_cycles",
+        )
+        return Matrix(
+            nf,
+            [[eval(p) for p in row] for row in matrix_raw],
+        )
+
+    def get_intersection_matrix_of_primitive_hodge_cycles(
+        self,
+    ) -> Matrix_rational_dense:
+        """
+        Returns the intersection pairing matrix whose (i,j)-th entry
+        corresponds to the intersection pairing of the i-th and j-th elements
+        in the basis returned by 'get_basis_of_primitive_hodge_cycles'.
+        """
+        matrix_raw = self.get_data_from_json(
+            "intersection_of_primitive_hodge_cycles",
+            "intersection_matrix_of_primitive_hodge_cycles",
+        )
+        return Matrix(QQ, matrix_raw)
 
 
-def full_pairing(
+# ================================================================ #
+# === MULTIPROCESSING SCRIPT FOR COMPUTING FULL PAIRING MATRIX === #
+# ================================================================ #
+
+
+def mp_full_pairing(
     zetad: NumberFieldElement,
     weights: list[int],
     form: tuple[int, ...],
@@ -126,16 +236,16 @@ def full_pairing(
     return (-1) ** (n + 1) * simple_pair * gamma_value / factorial(n // 2)
 
 
-def full_pairing_matrix_entry_calculator_worker(
+def mp_full_pairing_worker(
     args: tuple[Any, ...],
 ) -> tuple[int, int, NumberFieldElement]:
     zetad, weights, form, cycle, i, j, gamma_value = args
-    return i, j, full_pairing(zetad, weights, form, cycle, gamma_value)
+    return i, j, mp_full_pairing(zetad, weights, form, cycle, gamma_value)
 
 
-def get_period_matrix_of_prim_hodge_cycles_multi_processing(
+def mp_get_period_matrix_of_prim_hodge_cycles(
     K_formal: FormalNumberField,
-    weights: tuple[int, ...],
+    ws: tuple[int, ...],
     degree: int,
     I: Sequence[tuple[int, ...]],
     J_hodge: Sequence[int],
@@ -147,28 +257,16 @@ def get_period_matrix_of_prim_hodge_cycles_multi_processing(
     zetad = K_formal.from_str(f"zeta{degree}")
     with Pool(NCORES) as pool:
         gamma_value_key = lambda j: tuple(
-            sorted(
-                [
-                    (formi + 1) * wi
-                    for formi, wi in zip(I[J_hodge[j]], weights)
-                ]
-            )
+            sorted([(bi + 1) * wi for bi, wi in zip(I[J_hodge[j]], ws)])
         )
+        idx_to_val = lambda idx: gamma_values.get(gamma_value_key(idx))
         tasks = [
-            (
-                zetad,
-                weights,
-                I[J_hodge[j]],
-                I[i],
-                i,
-                j,
-                gamma_values.get(gamma_value_key(j)),
-            )
+            (zetad, ws, I[J_hodge[j]], I[i], i, j, idx_to_val(j))
             for i, j in iterprod(range(len(I)), range(len(J_hodge)))
         ]
         for i, j, val in tqdm(
             pool.imap_unordered(
-                full_pairing_matrix_entry_calculator_worker,
+                mp_full_pairing_worker,
                 tasks,
                 chunksize=max(len(tasks) // (10 * NCORES), 1),
             ),
@@ -179,5 +277,66 @@ def get_period_matrix_of_prim_hodge_cycles_multi_processing(
     return period_matrix
 
 
-# gamma_tuple = tuple(sorted([(formi + 1) * wi for formi, wi in zip(form, ws)]))
-# gamma_value = self.gamma_values[gamma_tuple]
+# =============================================================== #
+# === MULTIPROCESSING SCRIPT FOR COMPUTING CUP PAIRING MATRIX === #
+# =============================================================== #
+
+
+def mp_weighted_sum_of_index(
+    ms: tuple[int, ...], b: tuple[int, ...], c: int = 1
+) -> Rat:
+    return sum([Rat((c * (bi + 1)) % mi / mi) for bi, mi in zip(b, ms)])
+
+
+def mp_cup_pairing(
+    form1: tuple[int, ...],
+    form2: tuple[int, ...],
+    ms: tuple[int, ...],
+    d: int,
+) -> Rat:
+    """
+    Computes the cup pairing between two forms n-forms at infinity
+    (given by integration of their cup product). It is amazing
+    that this gives a rational number!
+    """
+    n = len(ms) - 2
+    A1 = mp_weighted_sum_of_index(ms, form1)
+    A2 = mp_weighted_sum_of_index(ms, form2)
+    assert A1.is_integral() and A2.is_integral()  # forms are at infinity
+    if any(bi1 + bi2 + 2 != mi for bi1, bi2, mi in zip(form1, form2, ms)):
+        return 0
+    output_num = (-1) ** (binomial(n + 1, 2) + A1) * d * prod(ms)
+    output_den = factorial(A1 - 1) * factorial(A2 - 1)
+    return output_num / output_den
+
+
+def mp_cup_pairing_worker(
+    args: tuple[Any, ...],
+) -> tuple[int, int, NumberFieldElement]:
+    i, j, formi, formj, ms, d = args
+    return i, j, mp_cup_pairing(formi, formj, ms, d)
+
+
+def mp_get_cup_pairing_matrix_of_forms_at_infty(
+    I: Sequence[tuple[int, ...]],
+    J_inf: Sequence[int],
+    ms: tuple[int, ...],
+    d: int,
+) -> Matrix_rational_dense:
+    cup_pairing_matrix = zero_matrix(QQ, len(J_inf), len(J_inf))
+    with Pool(NCORES) as pool:
+        tasks = [
+            (i, j, I[J_inf[i]], I[J_inf[j]], ms, d)
+            for i, j in iterprod(range(len(J_inf)), range(len(J_inf)))
+        ]
+        for i, j, val in tqdm(
+            pool.imap_unordered(
+                mp_cup_pairing_worker,
+                tasks,
+                chunksize=max(len(tasks) // (10 * NCORES), 1),
+            ),
+            desc="Assembling cup period matrix",
+            total=len(tasks),
+        ):
+            cup_pairing_matrix[i, j] = val
+    return cup_pairing_matrix

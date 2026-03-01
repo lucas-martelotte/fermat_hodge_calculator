@@ -181,7 +181,7 @@ class HodgeCalculator(BasicHodgeCalculator):
 
     def solve_from_periods(
         self, period_matrix_to_solve: Matrix_generic_dense
-    ) -> Matrix_integer_dense:
+    ) -> Matrix_rational_dense:
         """
         The input matrix's (i,j)-th coordinate should be the period
         of some to-be-discovered i-th primitive hodge cycle with the
@@ -197,7 +197,7 @@ class HodgeCalculator(BasicHodgeCalculator):
         period_coords = K_formal.solve_left_in_rationals(
             hodge_period_matrix, period_matrix_to_solve
         ).T
-        return Matrix(ZZ, period_coords)  # Solution must lie inside ZZ!!
+        return Matrix(QQ, period_coords)  # Solution must lie inside (1/d)*ZZ
 
     def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
         """
@@ -214,7 +214,7 @@ class HodgeCalculator(BasicHodgeCalculator):
             "rank": data["rank"],
             "cycle_ids": data["cycle_ids"],
             "period_matrix": period_matrix,
-            "coordinates": Matrix(ZZ, data["coordinates"]),
+            "coordinates": Matrix(QQ, data["coordinates"]),
         }
 
     # =============== #

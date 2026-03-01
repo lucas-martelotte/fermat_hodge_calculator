@@ -14,22 +14,41 @@ from time import perf_counter
 import json
 
 
-start_time = perf_counter()
-# ======================= #
-d = 8
-
+"""
+d = 9
 hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((d, d, d, d))
-factory = LineFactory(X)
-# lines = factory.get_hodge_cycles()
-# print(len(lines))
-# for line_id, line in lines.items():
-#    print(line_id)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "lines")
-# line_data = calculator.get_hodge_cycle_factory_data("lines")
-# print(line_data["coordinates"])
+line_data = calculator.get_hodge_cycle_factory_data("lines2")
+line_coords = line_data["coordinates"]
+for i in range(line_coords.nrows()):
+    for j in range(line_coords.ncols()):
+        val = (line_coords[i, j] * 9)
+        if int(val) != val:
+            print(f"aaaaa: {line_coords[i, j]}")
+            break
+exit()
+"""
 
+for d in [10, 11, 12]:
 
-# ======================= #
-end_time = perf_counter()
-print(end_time - start_time)
+    start_time = perf_counter()
+    # ======================= #
+
+    print(f"Computing for degree {d}")
+
+    hodge_calculator_factory = HodgeCalculatorFactory()
+    X, calculator = hodge_calculator_factory.create((d, d, d, d))
+    factory = LineFactory(X)
+    # lines = factory.get_hodge_cycles()
+    # print(len(lines))
+    # for line_id, line in lines.items():
+    #    print(line_id)
+    calculator.compute_periods_from_hodge_cycle_factory(factory, "lines2")
+    # line_data = calculator.get_hodge_cycle_factory_data("lines")
+    # print(line_data["coordinates"])
+
+    print(f"Finished degree {d}")
+    
+    # ======================= #
+    end_time = perf_counter()
+    print(end_time - start_time)

@@ -1,1 +1,1 @@
-NCORES = 4
+NCORES = 8

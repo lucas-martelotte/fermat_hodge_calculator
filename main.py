@@ -14,20 +14,18 @@ from time import perf_counter
 import json
 
 
-"""
-d = 9
+d = 11
 hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((d, d, d, d))
 line_data = calculator.get_hodge_cycle_factory_data("lines2")
 line_coords = line_data["coordinates"]
+vals = set()
 for i in range(line_coords.nrows()):
     for j in range(line_coords.ncols()):
-        val = (line_coords[i, j] * 9)
-        if int(val) != val:
-            print(f"aaaaa: {line_coords[i, j]}")
-            break
+        val = (line_coords[i, j])
+        vals.add(val)
+print(vals)
 exit()
-"""
 
 for d in [10, 11, 12]:
 

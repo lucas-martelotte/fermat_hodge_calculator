@@ -154,21 +154,9 @@ class HodgeCalculator(BasicHodgeCalculator):
         I = self.multi_indexes
         J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
         ms = self.variety.exps
-        # ======================================= #
         period_matrix = mp_get_hodge_cycle_factory_period_matrix(
             nf, I, J_hodge, cycles, ms, xs
         )
-        # period_matrix = Matrix(nf, len(cycles), len(J_hodge), 0)
-        # for i, j in tqdm(
-        #    iterprod(range(len(cycles)), range(len(J_hodge))),
-        #    desc="Computing periods",
-        #    total=len(cycles) * len(J_hodge),
-        # ):
-        #    form = I[J_hodge[j]]
-        #    form_poly = prod([xi**bi for xi, bi in zip(xs, form)])
-        #    period = cycles[i].pairing(form_poly) * prod(ms)
-        #    period_matrix[i, j] = period
-        # ======================================= #
         cycle_coords = self.solve_from_periods(period_matrix)
         data = {
             "rank": int(cycle_coords.rank()),
@@ -190,14 +178,10 @@ class HodgeCalculator(BasicHodgeCalculator):
         and then returns a matrix whose i-th column is the i-th cycle
         writen on the standard Z-basis of primitive hodge cycles.
         """
-        hodge_period_matrix = (
-            self.get_period_matrix_of_primitive_hodge_cycles()
-        )
-        K_formal = self.variety.formal_base_field
-        period_coords = K_formal.solve_left_in_rationals(
-            hodge_period_matrix, period_matrix_to_solve
-        ).T
-        return Matrix(QQ, period_coords)  # Solution must lie inside (1/d)*ZZ
+        hodge_period_matrix = self.get_period_matrix_of_primitive_hodge_cycles()
+        period_coords = hodge_period_matrix.solve_left(period_matrix_to_solve).T
+        coords_blueprint = sage_matrix_map(str, period_coords) # to convert to rational
+        return Matrix(QQ, coords_blueprint)  # Solution must lie inside (1/d)*ZZ
 
     def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
         """

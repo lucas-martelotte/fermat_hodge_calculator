@@ -13,21 +13,30 @@ from src.hodge_calculator import BasicHodgeCalculator
 from time import perf_counter
 import json
 
-
-d = 11
+"""
+d = 3
 hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((d, d, d, d))
-line_data = calculator.get_hodge_cycle_factory_data("lines2")
+hodge_period_matrix = calculator.get_period_matrix_of_primitive_hodge_cycles()
+line_data = calculator.get_hodge_cycle_factory_data("lines")
 line_coords = line_data["coordinates"]
-vals = set()
-for i in range(line_coords.nrows()):
-    for j in range(line_coords.ncols()):
-        val = (line_coords[i, j])
-        vals.add(val)
-print(vals)
-exit()
+line_periods = line_data["period_matrix"]
 
-for d in [10, 11, 12]:
+print(line_periods)
+print()
+print(hodge_period_matrix.nrows(), hodge_period_matrix.ncols())
+print(line_coords.nrows(), line_coords.ncols())
+print((hodge_period_matrix.T * line_coords).T)
+
+print()
+print("======================================")
+print()
+"""
+
+
+
+
+for d in [5]:
 
     start_time = perf_counter()
     # ======================= #

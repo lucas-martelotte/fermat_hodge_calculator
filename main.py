@@ -34,8 +34,6 @@ print()
 """
 
 
-
-
 for d in [5]:
 
     start_time = perf_counter()
@@ -55,7 +53,7 @@ for d in [5]:
     # print(line_data["coordinates"])
 
     print(f"Finished degree {d}")
-    
+
     # ======================= #
     end_time = perf_counter()
     print(end_time - start_time)

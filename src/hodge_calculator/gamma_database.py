@@ -96,7 +96,7 @@ class GammaDatabase:  # TODO Fix issue with singleton metaclass
         return self._database[key]
 
 
-GAMMA_DATABASE = GammaDatabase(check_gamma_values=False)
+GAMMA_DATABASE = GammaDatabase(check_gamma_values=True)
 
 # === degree 2 surface === #
 K_formal = FormalCyclotomicField(4)
@@ -415,6 +415,94 @@ embedding: Callable[[str], complex] = lambda expr: complex(
 GAMMA_DATABASE.add((2, 11), GammaStructure(K_formal, gamma_values, embedding))
 
 # === degree 12 surface === #
+# alpha equation: x**4 + 8*zeta12**3 - 16*zeta12 + 12
+# alpha = 2**(1/4) * 3**(1/8) * sqrt(sqrt(3)-1)
+Kbase = PolynomialRing(
+    QQ, ["zeta24base", "root6of2base", "root4of3base", "alphabase"]
+)
+zeta24base, root6of2base, root4of3base, alphabase = Kbase.gens()
+zeta12base = zeta24base**2
+root3base = 2 * zeta12base - zeta12base**3
+root2base = zeta24base + zeta24base**3 - zeta24base**5
+Kbase_equations = [
+    zeta24base**8 - zeta24base**4 + 1,
+    root6of2base**3 - root2base,
+    root4of3base**2 - root3base,
+    alphabase**4 + 8*zeta12base**3 - 16*zeta12base + 12
+]
+K_formal = FormalNumberField(Kbase, Kbase_equations)
+zeta24 = K_formal.K(K_formal.from_str("zeta24"))
+root6of2 = K_formal.K(K_formal.from_str("root6of2"))
+root4of3 = K_formal.K(K_formal.from_str("root4of3"))
+alpha = K_formal.K(K_formal.from_str("alpha"))
+zeta12 = zeta24**2
+root3of2 = root6of2**2 
+root2, root3 = root6of2**3, root4of3**2
+root6 = root2 * root3
+K_formal.locals["zeta12"] = zeta12
+K_formal.locals["root3of2"] = root3of2
+K_formal.locals["root2"] = root2
+K_formal.locals["root3"] = root3
+K_formal.locals["root6"] = root6
+gamma_values = {
+    # Lines (on degree 2)
+    (6, 6, 6, 6): -1 / K_formal.K(4),
+    # Lines (on degree 3)
+    (4, 4, 8, 8): -1 / K_formal.K(3),
+    # Lines (on degree 4)
+    (3, 3, 9, 9): -1 / K_formal.K(2),
+    (3, 6, 6, 9): -1 / (2 * root2),
+    # Lines (on degree 6)
+    (2, 2, 10, 10): -K_formal.K(1),
+    (2, 4, 8, 10): -1 / root3,
+    (2, 6, 6, 10): -1 / K_formal.K(2),
+    (4, 6, 6, 8): -1 / (2 * root3),
+    # Lines ("true lines")
+    (1, 1, 11, 11): -1 / (K_formal.K(2) - root3),
+    (1, 2, 10, 11): -root2 / (root3 - 1),
+    (1, 3, 9, 11): -1 / (root3 - 1),
+    (1, 4, 8, 11): -root2 / (root3 * (root3 - 1)),
+    (1, 5, 7, 11): -K_formal.K(1),
+    (1, 6, 6, 11): -1 / (root2 * (root3 - 1)),
+    (2, 3, 9, 10): -1 / root2,
+    (2, 5, 7, 10): -root2 / (root3 + 1),
+    (3, 4, 8, 9): -1 / root6,
+    (3, 5, 7, 9): -1 / (root3 + 1),
+    (4, 5, 7, 8): -root2 / (root3 * (1 + root3)),
+    (5, 5, 7, 7): -1 / (root3 + 2),
+    (5, 6, 6, 7): -1 / (root2 * (root3 + 1)),
+    # Aoki-shioda (on degree 6)
+    (2, 6, 8, 8): -1 / (root3 * root3of2),
+    (4, 4, 6, 10): -1 / (root3 * root3of2**2),
+    # Aoki-shioda ("true aoki-shioda")
+    (1, 5, 9, 9): - root4of3 / root2,
+    (1, 6, 7, 10): -1 / root6of2,
+    (2, 5, 6, 11): -1 / root6of2**5,
+    (3, 3, 7, 11): -1 / (root2 * root4of3),
+    # Exceptional cycles
+    (1, 4, 9, 10): - root3of2 / alpha,
+    (1, 6, 8, 9): -(1 + zeta12 - zeta12**3) * zeta24 * alpha / (2 * root4of3),
+    (1, 7, 8, 8): -root2 / root3,
+    (2, 3, 8, 11): - root6of2 / (alpha * root4of3),
+    (2, 5, 8, 9): -(root2 * root3of2**2) / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+    (3, 4, 6, 11): - (1 + zeta12 - zeta12**3) * zeta24 * alpha / (2 * root2 * root3),
+    (3, 4, 7, 10): -root2 / (root6of2 * root4of3 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+    (3, 6, 7, 8): -1 / (root4of3 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+    (4, 4, 5, 11): -1 / root6,
+    (4, 5, 6, 9): -root2 / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+}
+embedding_locals = {
+    "zeta24": exp(2 * pi * I / 24),
+    "root6of2": 2 ** (QQ(1) / 6),
+    "root4of3": 3 ** (QQ(1) / 4),
+    "alpha": 2 ** (QQ(1) / 4) * 3 ** (QQ(1) / 8) * sqrt(sqrt(3) - QQ(1)),
+}
+embedding: Callable[[str], complex] = lambda expr: complex(
+    sage_eval(expr, locals=embedding_locals).n()
+)
+GAMMA_DATABASE.add((2, 12), GammaStructure(K_formal, gamma_values, embedding))
+
+"""
 Kbase = PolynomialRing(
     QQ, ["zeta24base", "root12of2base", "rr3m1base", "root8of3base"]
 )
@@ -502,3 +590,4 @@ embedding: Callable[[str], complex] = lambda expr: complex(
     sage_eval(expr, locals=embedding_locals).n()
 )
 GAMMA_DATABASE.add((2, 12), GammaStructure(K_formal, gamma_values, embedding))
+"""

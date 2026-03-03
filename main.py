@@ -13,6 +13,7 @@ from src.hodge_calculator import HodgeCalculator, BasicHodgeCalculator
 from src.hodge_cycles.hodge_cycle_factories import LineFactory
 from src.hodge_calculator import HodgeCalculatorFactory
 from src.hodge_calculator import BasicHodgeCalculator
+from src.utils.sage_imports import QQ
 from time import perf_counter
 import json
 
@@ -24,6 +25,12 @@ start_time = perf_counter()
 d = 12
 hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((d, d, d, d))
+#periods = calculator.get_period_matrix_of_primitive_hodge_cycles()
+intersection = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
+print("Intersection calculated!")
+
+exit()
+
 K_formal = X.formal_base_field
 print("Importing period matrix.")
 P = calculator.get_period_matrix_of_primitive_hodge_cycles()
@@ -34,6 +41,7 @@ print("Size of blocked period matrix", Prat.nrows(), Prat.ncols())
 print("Computing right-inverse.")
 Q = Prat.pseudoinverse()
 print("Right-inverse computed. Size: ", Q.nrows(), Q.ncols())
+print(Prat * Q == identity_matrix(QQ, P.nrows()))
 
 
 end_time = perf_counter()

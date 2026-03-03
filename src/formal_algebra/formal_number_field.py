@@ -1,4 +1,5 @@
 from itertools import product as iterprod
+from typing import Any
 
 from src.utils.sage_imports import (
     PolynomialQuotientRingElement,
@@ -7,6 +8,7 @@ from src.utils.sage_imports import (
     MPolynomialRing_base,
     Matrix_generic_dense,
     MPolynomial_element,
+    NumberFieldElement,
     zero_matrix,
     sage_eval,
     vector,
@@ -14,6 +16,9 @@ from src.utils.sage_imports import (
     QQ,
 )
 from src.utils.auxiliary import return_true
+from src.utils.settings import NCORES
+from multiprocessing import Pool
+from tqdm import tqdm
 
 
 class FormalNumberField:
@@ -81,6 +86,8 @@ class FormalNumberField:
         the k-th coefficient of M[i,j] in the Q-basis of K indexed
         by self.monomial_indexes.
         """
+        return mp_convert_to_rational_horizontally_blocked_matrix(M, self.Kbase_monomials, self.degree)
+        # OLD CODE
         M_rat = zero_matrix(QQ, M.nrows(), M.ncols() * self.degree)
         for i, j in iterprod(range(M.nrows()), range(M.ncols())):
             curr_vec = self.vector(M[i, j])
@@ -95,3 +102,36 @@ class FormalNumberField:
         M_rat = self.convert_to_rational_horizontally_blocked_matrix(M)
         V_rat = self.convert_to_rational_horizontally_blocked_matrix(V)
         return M_rat.solve_left(V_rat)
+
+# ===================================================================================== #
+# === MULTIPROCESSING SCRIPT FOR CONVERTING TO RATIONAL HORIZONTALLY BLOCKED MATRIX === #
+# ===================================================================================== #
+
+def mp_convert_entry_to_horizontal_block_worker(
+    args: tuple[Any, ...],
+) -> tuple[int, int, NumberFieldElement]:
+    i, j, entry, mons = args
+    entry_lift = entry.lift()
+    return i, j, vector([entry_lift.monomial_coefficient(mon) for mon in mons])
+
+def mp_convert_to_rational_horizontally_blocked_matrix(
+    M: Matrix_generic_dense,
+    mons: list[MPolynomial_element], # these are in K_base
+    degree: int,
+) -> Matrix_rational_dense:
+    blocked_matrix = zero_matrix(QQ, M.nrows(), M.ncols() * degree)
+    with Pool(NCORES) as pool:
+        tasks = [(i, j, M[i, j], mons) for i, j in iterprod(range(M.nrows()), range(M.ncols()))]
+        for i, j, val in tqdm(
+            pool.imap_unordered(
+                mp_convert_entry_to_horizontal_block_worker,
+                tasks,
+                chunksize=max(len(tasks) // (10 * NCORES), 1),
+            ),
+            desc="Assembling blocked matrix",
+            total=len(tasks),
+        ):
+            for k in range(degree):
+                blocked_matrix[i, j + M.ncols() * k] = val[k]
+    return blocked_matrix
+

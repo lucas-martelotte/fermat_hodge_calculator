@@ -17,7 +17,7 @@ from time import perf_counter
 import json
 from src.utils.sage_imports import RR, zero_matrix
 from src.utils.auxiliary import get_pairings, sage_matrix_map
-from src.hodge_cycles.hodge_cycle_factories import AokiShiodaType1Factory
+from src.hodge_cycles.hodge_cycle_factories import AokiShiodaType1Factory, AokiShiodaType3Factory, AokiShiodaType2BFactory
 
 
 start_time = perf_counter()
@@ -29,16 +29,22 @@ start_time = perf_counter()
 # blocked_matrix = zero_matrix(RR, 600, 900 * 96)
 # print("Created mat")
 
-
-d = 6
+d = 10
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((6, 6, 6, 6))
+X, calculator = hodge_calculator_factory.create((10, 10, 10, 10))
 K_formal = X.formal_base_field
 
-root3of2 = K_formal.from_str("root3of2")
-zeta12 = K_formal.from_str("zeta12")
-factory = AokiShiodaType1Factory(X, [0, 1, 2, 3], root3of2, zeta12)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "as1")
+#root3of2 = K_formal.from_str("root3of2")
+#zeta12 = K_formal.from_str("zeta12")
+#root3 = K_formal.from_str("root3")
+root5of2 = K_formal.from_str("root5of2")
+zeta20 = K_formal.from_str("zeta20")
+#factory = AokiShiodaType2BFactory(X, [0, 1, 2, 3], root4of2, zeta16)
+factory = AokiShiodaType1Factory(X, [0, 1, 2, 3], root5of2, zeta20)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "as3")
+
+end_time = perf_counter()
+print(end_time - start_time)
 
 exit()
 

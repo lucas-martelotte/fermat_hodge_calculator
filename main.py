@@ -17,6 +17,7 @@ from time import perf_counter
 import json
 from src.utils.sage_imports import RR, zero_matrix
 from src.utils.auxiliary import get_pairings, sage_matrix_map
+from src.hodge_cycles.hodge_cycle_factories import AokiShiodaType1Factory
 
 
 start_time = perf_counter()
@@ -24,25 +25,28 @@ start_time = perf_counter()
 # degree 8: 1655 seconds (standard methods)
 # degree 8: rational methods (11 seconds)
 
-#print("Creating mat")
-#blocked_matrix = zero_matrix(RR, 600, 900 * 96)
-#print("Created mat")
+# print("Creating mat")
+# blocked_matrix = zero_matrix(RR, 600, 900 * 96)
+# print("Created mat")
 
 
-d = 12
+d = 6
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((3, 3, 12, 12))
+X, calculator = hodge_calculator_factory.create((6, 6, 6, 6))
 K_formal = X.formal_base_field
 
-factory = LineFactory(X)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "lines")
+root3of2 = K_formal.from_str("root3of2")
+zeta12 = K_formal.from_str("zeta12")
+factory = AokiShiodaType1Factory(X, [0, 1, 2, 3], root3of2, zeta12)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "as1")
+
+exit()
 
 
-
-#line_data = calculator.get_hodge_cycle_factory_data("lines")
-#line_coords = line_data["coordinates"]
-#ncols, nrows = line_coords.ncols(), line_coords.nrows()
-#print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
+# line_data = calculator.get_hodge_cycle_factory_data("lines")
+# line_coords = line_data["coordinates"]
+# ncols, nrows = line_coords.ncols(), line_coords.nrows()
+# print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
 
 
 exit()
@@ -51,9 +55,15 @@ period_matrix = calculator.get_period_matrix_of_primitive_hodge_cycles()
 line_data = calculator.get_hodge_cycle_factory_data("lines_wrong")
 line_periods = line_data["period_matrix"]
 
-hodge_period_matrix_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(period_matrix)
-period_matrix_to_solve_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(line_periods)
-period_coords = hodge_period_matrix_blocked.solve_left(period_matrix_to_solve_blocked).T
+hodge_period_matrix_blocked = (
+    K_formal.convert_to_rational_horizontally_blocked_matrix(period_matrix)
+)
+period_matrix_to_solve_blocked = (
+    K_formal.convert_to_rational_horizontally_blocked_matrix(line_periods)
+)
+period_coords = hodge_period_matrix_blocked.solve_left(
+    period_matrix_to_solve_blocked
+).T
 line_coords = Matrix(QQ, period_coords)  # Solution must lie inside (1/d)*ZZ
 line_rank = int(line_coords.rank())
 
@@ -111,16 +121,16 @@ alphabase**2 - root2base * root4of3base * (root3base - 1),
 
 exit()
 
-#period_matrix = calculator.get_period_matrix_of_primitive_hodge_cycles()
-#for i in range(period_matrix.nrows()):
+# period_matrix = calculator.get_period_matrix_of_primitive_hodge_cycles()
+# for i in range(period_matrix.nrows()):
 #    for j in range(period_matrix.ncols()):
 #        input()
 #        print(period_matrix[i, j])
-#line_data = calculator.get_hodge_cycle_factory_data("lines")
-#line_coords = line_data["coordinates"]
-#ncols, nrows = line_coords.ncols(), line_coords.nrows()
-#print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
-#exit()
+# line_data = calculator.get_hodge_cycle_factory_data("lines")
+# line_coords = line_data["coordinates"]
+# ncols, nrows = line_coords.ncols(), line_coords.nrows()
+# print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
+# exit()
 
 line_factory = LineFactory(X)
 calculator.compute_periods_from_hodge_cycle_factory(line_factory, "lines2")
@@ -131,8 +141,12 @@ line_data = calculator.get_hodge_cycle_factory_data("lines2")
 line_coords = line_data["coordinates"]
 line_periods = line_data["period_matrix"]
 
-hodge_periods_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(hodge_periods)
-line_periods_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(line_periods)
+hodge_periods_blocked = (
+    K_formal.convert_to_rational_horizontally_blocked_matrix(hodge_periods)
+)
+line_periods_blocked = (
+    K_formal.convert_to_rational_horizontally_blocked_matrix(line_periods)
+)
 print("asserting...")
 assert line_coords.T * hodge_periods == line_periods
 assert line_coords.T * hodge_periods_blocked == line_periods_blocked
@@ -149,7 +163,6 @@ print(line_data["rank"])
 
 exit()
 print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
-
 
 
 exit()
@@ -173,14 +186,15 @@ print(hodge_basis.nrows(), hodge_basis.ncols())
 print(nrows, ncols)
 print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
 
-new_coords = Matrix(QQ, nrows, ncols, lambda i, j: line_coords[i, j] - line_coords[i, 0])
+new_coords = Matrix(
+    QQ, nrows, ncols, lambda i, j: line_coords[i, j] - line_coords[i, 0]
+)
 print({new_coords[i, j] for i in range(nrows) for j in range(ncols)})
 
 
-
-#periods = calculator.get_period_matrix_of_primitive_hodge_cycles()
-#intersection = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
-#print("Intersection calculated!")
+# periods = calculator.get_period_matrix_of_primitive_hodge_cycles()
+# intersection = calculator.get_intersection_matrix_of_primitive_hodge_cycles()
+# print("Intersection calculated!")
 exit()
 
 print("Importing period matrix.")

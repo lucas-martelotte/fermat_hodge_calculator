@@ -33,6 +33,7 @@ from ..formal_algebra import (
     FormalNumberField,
     PolynomialRingOverFormalNumberField,
 )
+from src.utils.settings import CHECK_GAMMA_VALUES
 
 
 @dataclass
@@ -96,7 +97,7 @@ class GammaDatabase:  # TODO Fix issue with singleton metaclass
         return self._database[key]
 
 
-GAMMA_DATABASE = GammaDatabase(check_gamma_values=True)
+GAMMA_DATABASE = GammaDatabase(check_gamma_values=CHECK_GAMMA_VALUES)
 
 # === degree 2 surface === #
 K_formal = FormalCyclotomicField(4)
@@ -428,7 +429,7 @@ Kbase_equations = [
     zeta24base**8 - zeta24base**4 + 1,
     root6of2base**3 - root2base,
     root4of3base**2 - root3base,
-    alphabase**4 + 8*zeta12base**3 - 16*zeta12base + 12
+    alphabase**2 - root2base * root4of3base * (root3base - 1),
 ]
 K_formal = FormalNumberField(Kbase, Kbase_equations)
 zeta24 = K_formal.K(K_formal.from_str("zeta24"))

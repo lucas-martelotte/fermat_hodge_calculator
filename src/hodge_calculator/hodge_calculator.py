@@ -178,10 +178,12 @@ class HodgeCalculator(BasicHodgeCalculator):
         and then returns a matrix whose i-th column is the i-th cycle
         writen on the standard Z-basis of primitive hodge cycles.
         """
+        K_formal = self.variety.formal_base_field
         hodge_period_matrix = self.get_period_matrix_of_primitive_hodge_cycles()
-        period_coords = hodge_period_matrix.solve_left(period_matrix_to_solve).T
-        coords_blueprint = sage_matrix_map(str, period_coords) # to convert to rational
-        return Matrix(QQ, coords_blueprint)  # Solution must lie inside (1/d)*ZZ
+        hodge_period_matrix_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(hodge_period_matrix)
+        period_matrix_to_solve_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(period_matrix_to_solve)
+        period_coords = hodge_period_matrix_blocked.solve_left(period_matrix_to_solve_blocked).T
+        return Matrix(QQ, period_coords)  # Solution must lie inside (1/d)*ZZ
 
     def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:
         """
@@ -198,6 +200,7 @@ class HodgeCalculator(BasicHodgeCalculator):
             "rank": data["rank"],
             "cycle_ids": data["cycle_ids"],
             "period_matrix": period_matrix,
+            "number_of_cycles": data["number_of_cycles"],
             "coordinates": Matrix(QQ, data["coordinates"]),
         }
 

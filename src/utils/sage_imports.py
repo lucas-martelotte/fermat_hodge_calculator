@@ -3,6 +3,7 @@
 from sage.all import (
     QQ,
     SR,
+    RR,
     ZZ,
     CyclotomicField,
     Expression,

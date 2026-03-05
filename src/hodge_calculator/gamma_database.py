@@ -437,7 +437,7 @@ root6of2 = K_formal.K(K_formal.from_str("root6of2"))
 root4of3 = K_formal.K(K_formal.from_str("root4of3"))
 alpha = K_formal.K(K_formal.from_str("alpha"))
 zeta12 = zeta24**2
-root3of2 = root6of2**2 
+root3of2 = root6of2**2
 root2, root3 = root6of2**3, root4of3**2
 root6 = root2 * root3
 K_formal.locals["zeta12"] = zeta12
@@ -476,18 +476,23 @@ gamma_values = {
     (2, 6, 8, 8): -1 / (root3 * root3of2),
     (4, 4, 6, 10): -1 / (root3 * root3of2**2),
     # Aoki-shioda ("true aoki-shioda")
-    (1, 5, 9, 9): - root4of3 / root2,
+    (1, 5, 9, 9): -root4of3 / root2,
     (1, 6, 7, 10): -1 / root6of2,
     (2, 5, 6, 11): -1 / root6of2**5,
     (3, 3, 7, 11): -1 / (root2 * root4of3),
     # Exceptional cycles
-    (1, 4, 9, 10): - root3of2 / alpha,
+    (1, 4, 9, 10): -root3of2 / alpha,
     (1, 6, 8, 9): -(1 + zeta12 - zeta12**3) * zeta24 * alpha / (2 * root4of3),
     (1, 7, 8, 8): -root2 / root3,
-    (2, 3, 8, 11): - root6of2 / (alpha * root4of3),
-    (2, 5, 8, 9): -(root2 * root3of2**2) / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
-    (3, 4, 6, 11): - (1 + zeta12 - zeta12**3) * zeta24 * alpha / (2 * root2 * root3),
-    (3, 4, 7, 10): -root2 / (root6of2 * root4of3 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+    (2, 3, 8, 11): -root6of2 / (alpha * root4of3),
+    (2, 5, 8, 9): -(root2 * root3of2**2)
+    / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
+    (3, 4, 6, 11): -(1 + zeta12 - zeta12**3)
+    * zeta24
+    * alpha
+    / (2 * root2 * root3),
+    (3, 4, 7, 10): -root2
+    / (root6of2 * root4of3 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
     (3, 6, 7, 8): -1 / (root4of3 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
     (4, 4, 5, 11): -1 / root6,
     (4, 5, 6, 9): -root2 / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
@@ -503,92 +508,57 @@ embedding: Callable[[str], complex] = lambda expr: complex(
 )
 GAMMA_DATABASE.add((2, 12), GammaStructure(K_formal, gamma_values, embedding))
 
+
+# === degree 14 surface === #
 """
-Kbase = PolynomialRing(
-    QQ, ["zeta24base", "root12of2base", "rr3m1base", "root8of3base"]
-)
-zeta24base, root12of2base, rr3m1base, root8of3base = Kbase.gens()
-zeta12base = zeta24base**2
-root3base = 2 * zeta12base - zeta12base**3
-root2base = zeta24base + zeta24base**3 - zeta24base**5
-Kbase_equations = [
-    zeta24base**8 - zeta24base**4 + 1,
-    root12of2base**6 - root2base,
-    rr3m1base**2 - root3base + 1,
-    root8of3base**4 - root3base,
-]
-K_formal = FormalNumberField(Kbase, Kbase_equations)
-zeta24 = K_formal.from_str("zeta24")
-root12of2 = K_formal.from_str("root12of2")
-rr3m1 = K_formal.from_str("rr3m1")  # sqrt(sqrt(3)-1)
-root8of3 = K_formal.from_str("root8of3")
-zeta12 = zeta24**2
-root2, root3 = root12of2**6, 2 * zeta12 - zeta12**3
-root6, zeta6, zeta4 = root2 * root3, zeta12**2, zeta12**3
-zeta24 = (zeta12 + zeta12**2 - zeta12**3) / root2
-root4of3, root6of2, root4of2 = root8of3**2, root12of2**2, root12of2**3
-root3of2 = root12of2**4
-root3of4 = root12of2**8
-root4of6 = root4of2 * root4of3
-rr3p1 = (zeta24 + zeta24**3 - zeta24**7) * rr3m1  # sqrt(sqrt(3)+1)
-K_formal.locals["zeta12"] = zeta12
-K_formal.locals["rr3p1"] = rr3p1
-K_formal.locals["root2"] = root2
-K_formal.locals["root3"] = root3
+K_formal = FormalCyclotomicField(28)
 gamma_values = {
     # Lines (on degree 2)
-    (6, 6, 6, 6): -1 / K_formal.K(4),
-    # Lines (on degree 3)
-    (4, 4, 8, 8): -1 / K_formal.K(3),
-    # Lines (on degree 4)
-    (3, 3, 9, 9): -1 / K_formal.K(2),
-    (3, 6, 6, 9): -1 / (2 * root2),
-    # Lines (on degree 6)
-    (2, 2, 10, 10): -K_formal.K(1),
-    (2, 4, 8, 10): -1 / root3,
-    (2, 6, 6, 10): -1 / K_formal.K(2),
-    (4, 6, 6, 8): -1 / (2 * root3),
+    (7, 7, 7, 7): K_formal.K(0),
+    # Lines (on degree 7)
+    (2, 2, 12, 12): K_formal.K(0),
+    (2, 4, 10, 12): K_formal.K(0),
+    (2, 6, 8, 12): K_formal.K(0),
+    (4, 4, 10, 10): K_formal.K(0),
+    (4, 6, 8, 10): K_formal.K(0),
+    (6, 6, 8, 8): K_formal.K(0),
     # Lines ("true lines")
-    (1, 1, 11, 11): -1 / (K_formal.K(2) - root3),
-    (1, 2, 10, 11): -root2 / (root3 - 1),
-    (1, 3, 9, 11): -1 / (root3 - 1),
-    (1, 4, 8, 11): -root2 / (root3 * (root3 - 1)),
-    (1, 5, 7, 11): -K_formal.K(1),
-    (1, 6, 6, 11): -1 / (root2 * (root3 - 1)),
-    (2, 3, 9, 10): -1 / root2,
-    (2, 5, 7, 10): -root2 / (root3 + 1),
-    (3, 4, 8, 9): -1 / root6,
-    (3, 5, 7, 9): -1 / (root3 + 1),
-    (4, 5, 7, 8): -root2 / (root3 * (1 + root3)),
-    (5, 5, 7, 7): -1 / (root3 + 2),
-    (5, 6, 6, 7): -1 / (root2 * (root3 + 1)),
-    # Aoki-shioda (on degree 6)
-    (2, 6, 8, 8): -1 / (root3 * root3of2),
-    (4, 4, 6, 10): -1 / (root3 * root3of2**2),
+    (1, 1, 13, 13): K_formal.K(0),
+    (1, 2, 12, 13): K_formal.K(0),
+    (1, 3, 11, 13): K_formal.K(0),
+    (1, 4, 10, 13): K_formal.K(0),
+    (1, 5, 9, 13): K_formal.K(0),
+    (1, 6, 8, 13): K_formal.K(0),
+    (1, 7, 7, 13): K_formal.K(0),
+    (2, 3, 11, 12): K_formal.K(0),
+    (2, 5, 9, 12): K_formal.K(0),
+    (2, 7, 7, 12): K_formal.K(0),
+    (3, 3, 11, 11): K_formal.K(0),
+    (3, 4, 10, 11): K_formal.K(0),
+    (3, 5, 9, 11): K_formal.K(0),
+    (3, 6, 8, 11): K_formal.K(0),
+    (3, 7, 7, 11): K_formal.K(0),
+    (4, 5, 9, 10): K_formal.K(0),
+    (4, 7, 7, 10): K_formal.K(0),
+    (5, 5, 9, 9): K_formal.K(0),
+    (5, 6, 8, 9): K_formal.K(0),
+    (5, 7, 7, 9): K_formal.K(0),
+    (6, 7, 7, 8): K_formal.K(0),
     # Aoki-shioda ("true aoki-shioda")
-    (1, 4, 9, 10): -root12of2 / (root8of3 * rr3m1),
-    (1, 5, 9, 9): -root4of3 / root2,
-    (1, 6, 7, 10): -1 / root6of2,
-    (1, 6, 8, 9): -(root4of2 * rr3p1) / (2 * root8of3),
-    (1, 7, 8, 8): -root2 / root3,
-    (2, 3, 8, 11): -1 / (root12of2 * root8of3 * root4of3 * rr3m1),
-    (2, 5, 6, 11): -1 / (root3of2**2 * root6of2),
-    (2, 5, 8, 9): -(root4of2 * root3of2**2) / (2 * root8of3 * rr3p1),
-    (3, 3, 7, 11): -1 / (root2 * root4of3),
-    (3, 4, 6, 11): -rr3p1 / (2 * root4of6 * root8of3),
-    (3, 4, 7, 10): -(root12of2 * root8of3) / (root3 * rr3p1),
-    (3, 6, 7, 8): -1 / (root4of6 * root8of3 * rr3p1),
-    (4, 4, 5, 11): -1 / root6,
-    (4, 5, 6, 9): -root4of2 / (2 * root8of3 * rr3p1),
+    (1, 8, 9, 10): K_formal.K(0),
+    (2, 6, 7, 13): K_formal.K(0),
+    (1, 7, 8, 12): K_formal.K(0),
+    (2, 7, 9, 10): K_formal.K(0),
+    (2, 3, 10, 13): K_formal.K(0),
+    (4, 6, 7, 11): K_formal.K(0),
+    (3, 7, 8, 10): K_formal.K(0),
+    (2, 6, 9, 11): K_formal.K(0),
+    (4, 5, 7, 12): K_formal.K(0),
+    # Exceptional cycles
+    (4, 5, 6, 13): K_formal.K(0),
+    (1, 4, 11, 12): K_formal.K(0),
+    (1, 7, 9, 11): K_formal.K(0),
+    (3, 5, 7, 13): K_formal.K(0),
+    (3, 5, 8, 12): K_formal.K(0),
 }
-embedding_locals = {
-    "zeta24": exp(2 * pi * I / 24),
-    "root12of2": 2 ** (QQ(1) / 12),
-    "rr3m1": sqrt(sqrt(3) - QQ(1)),
-    "root8of3": 3 ** (QQ(1) / 8),
-}
-embedding: Callable[[str], complex] = lambda expr: complex(
-    sage_eval(expr, locals=embedding_locals).n()
-)
-GAMMA_DATABASE.add((2, 12), GammaStructure(K_formal, gamma_values, embedding))
 """

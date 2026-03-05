@@ -31,14 +31,18 @@ start_time = perf_counter()
 
 d = 12
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((d, d, d, d))
+X, calculator = hodge_calculator_factory.create((3, 3, 12, 12))
 K_formal = X.formal_base_field
 
+factory = LineFactory(X)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "lines")
 
-line_data = calculator.get_hodge_cycle_factory_data("lines")
-line_coords = line_data["coordinates"]
-ncols, nrows = line_coords.ncols(), line_coords.nrows()
-print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
+
+
+#line_data = calculator.get_hodge_cycle_factory_data("lines")
+#line_coords = line_data["coordinates"]
+#ncols, nrows = line_coords.ncols(), line_coords.nrows()
+#print({line_coords[i, j] for i in range(nrows) for j in range(ncols)})
 
 
 exit()

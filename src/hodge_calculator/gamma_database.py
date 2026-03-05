@@ -12,7 +12,7 @@
 
 from typing import Callable
 from dataclasses import dataclass
-from src.utils.singleton_metaclass import SingletonMetaclass
+from src.utils.singleton_metaclass import Singleton
 from itertools import product as iterprod
 from src.utils.auxiliary import coprimes
 from src.utils.sage_imports import (

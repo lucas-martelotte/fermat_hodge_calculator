@@ -23,7 +23,7 @@ start_time = perf_counter()
 
 hodge_calculator_factory = HodgeCalculatorFactory()
 
-degrees_to_check = [11]
+degrees_to_check = [10]
 
 # degree 2 surface
 if 2 in degrees_to_check:

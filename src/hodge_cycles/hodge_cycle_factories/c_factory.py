@@ -38,4 +38,4 @@ class ExceptionalTypeCFactory(CompleteIntersectionFactory):
         f2 = x1 - (b * x3**4 + a * x2 * x3)
         g2 = x1 - z3 * (b * x3**4 + a * x2 * x3)
         g2 *= x1 - z3**2 * (b * x3**4 + a * x2 * x3)
-        super().__init__(variety, [f1, f2], [g1, g2])
+        super().__init__(variety, [f1, f2], [g1, g2], zeta_exps_congruence_check=(2, 3, 4, 12))

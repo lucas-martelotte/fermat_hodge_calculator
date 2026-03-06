@@ -45,4 +45,5 @@ class ExceptionalTypeCBFactory(CompleteIntersectionFactory):
             + (a**2 * root3 / 2) * x3**6
             + root3 * (x2**3 + root3of2 * x0 * x2)
         )
-        super().__init__(variety, [f1, f2], [g1, g2])
+        zeta_check = (3, 4, 6, 12)
+        super().__init__(variety, [f1, f2], [g1, g2], zeta_exps_congruence_check=zeta_check)

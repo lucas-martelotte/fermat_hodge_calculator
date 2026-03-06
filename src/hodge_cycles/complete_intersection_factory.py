@@ -68,9 +68,15 @@ class CompleteIntersectionFactory(HodgeCycleFactory):
         variety: EvenDimensionalDiagonalVariety,
         fs: list[MPolynomial_element],
         gs: list[MPolynomial_element],
+        zeta_exps_congruence_check: tuple[int, ...] | None = None
     ):
         super().__init__(variety)
         self.fs, self.gs = fs, gs
+        # For ex., if zeta_exps_congruence_check = [2, 12], will only 
+        # consider a system of exponents such that no two tuples (e1, e2)
+        # and (d1, d2) satisfy e1 == d1 (mod 2) and e2 == d2 (mod 12)
+        nvars, d = len(variety.polynomial_variables), variety.degree
+        self.zeta_exps_congruence_check = zeta_exps_congruence_check or tuple([d]*nvars)
         assert len(fs) == len(gs)
         assert (
             sum(fi * gi for fi, gi in zip(fs, gs))
@@ -91,7 +97,15 @@ class CompleteIntersectionFactory(HodgeCycleFactory):
         id_to_equations: dict[
             str, tuple[list[MPolynomial_element], list[MPolynomial_element]]
         ] = {}
-        zeta_exps = iterprod(*[range(ei) for ei in ms])
+        zeta_exps_unfiltered = iterprod(*[range(ei) for ei in ms])
+        zeta_exps: list[tuple[int, ...]] = []
+        congrence_classes_added = set()
+        for zeta_exp in zeta_exps_unfiltered:
+            zeta_class = tuple(ei%ui for ei, ui in zip(zeta_exp, self.zeta_exps_congruence_check))
+            if zeta_class in congrence_classes_added:
+                continue
+            congrence_classes_added.add(zeta_class)
+            zeta_exps.append(zeta_exp)
         perms = [
             p
             for p in permutations(range(len(xs)))
@@ -100,7 +114,7 @@ class CompleteIntersectionFactory(HodgeCycleFactory):
         for cycle_id in tqdm(
             iterprod(perms, zeta_exps),
             desc="Listing cycles up to automorphism",
-            total=prod(ms) * count_fixed_permutations(ms),
+            total=len(zeta_exps) * count_fixed_permutations(ms),
         ):
             perm, zeta_exp = cycle_id
             cycle_fs = [self.action(perm, zeta_exp, fi) for fi in self.fs]

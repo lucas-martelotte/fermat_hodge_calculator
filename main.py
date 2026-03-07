@@ -50,8 +50,8 @@ alpha = K_formal.from_str("alpha")
 zeta12 = zeta24**2
 root3of2 = root6of2**2
 # factory = AokiShiodaType2BFactory(X, [0, 1, 2, 3], root4of2, zeta16)
-factory = ExceptionalTypeCFactory(X, [0, 1, 2, 3], zeta12, alpha)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "c")
+factory = ExceptionalTypeCBFactory(X, [0, 1, 2, 3], zeta12, root3of2, alpha)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "cb")
 
 end_time = perf_counter()
 print(end_time - start_time)

@@ -27,7 +27,7 @@ class FormalIdealDissector:
     def __init__(
         self,
         formal_polynomial_ring: PolynomialRingOverFormalNumberField,
-        weights: list[int],
+        weights: tuple[int, ...],
         ideal: MPolynomialIdeal,
     ):
         self.formal_polynomial_ring = formal_polynomial_ring
@@ -40,7 +40,7 @@ class FormalIdealDissector:
 
     def _get_monomials_of_degree(self, deg: int) -> list[MPolynomial_element]:
         ws, xs = self.weights, self.formal_polynomial_ring.R.gens()
-        exps = get_all_sums_equal_to_d(ws, deg)
+        exps = get_all_sums_equal_to_d(list(ws), deg)
         return [prod(xi**ei for xi, ei in zip(xs, exp)) for exp in exps]
 
     def _degree(self, poly: MPolynomialIdeal) -> int:
@@ -66,7 +66,6 @@ class FormalIdealDissector:
         """Returns a basis of the component of degree = deg of the ideal."""
         R_formal = self.formal_polynomial_ring
         old_elements: list[MPolynomial_element] = []
-        ws, xs = self.weights, self.formal_polynomial_ring.R.gens()
         for i in range(1, deg, 1):
             b1 = self.get_basis_of_new_elements_of_component(i)
             monslst = self._get_monomials_of_degree(deg - i)

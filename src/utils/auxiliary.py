@@ -77,7 +77,7 @@ def get_pairings(n: int) -> list[list[tuple[int, int]]]:
     return output
 
 
-def get_all_sums_equal_to_d(es: list[int], d) -> list[list[int]]:
+def get_all_sums_equal_to_d(es: list[int], d: int) -> list[list[int]]:
     """
     Gets integers e_1, ..., e_n as input and returns all
     tuples (u_1, ..., u_n) of non negative integers u_i >= 0

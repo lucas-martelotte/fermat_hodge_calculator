@@ -9,7 +9,9 @@ from .formal_number_field import FormalNumberField
 
 
 class PolynomialRingOverFormalNumberField:
-    def __init__(self, formal_field: FormalNumberField, varnames: list[str]) -> None:
+    def __init__(
+        self, formal_field: FormalNumberField, varnames: list[str]
+    ) -> None:
         self.formal_field = formal_field
         self.R = PolynomialRing(formal_field.K, varnames)
         self.R_variables = self.R.gens()
@@ -25,11 +27,15 @@ class PolynomialRingOverFormalNumberField:
         n_comps = self.formal_field.number_of_components
         self.Kbase_to_Rbase = Kbase.hom(list(Rbase_vars)[:n_comps], Rbase)
         Kbase_ideal_gens = self.formal_field.Kbase_ideal.gens()
-        self.Rbase_equations = [self.Kbase_to_Rbase(x) for x in Kbase_ideal_gens]
+        self.Rbase_equations = [
+            self.Kbase_to_Rbase(x) for x in Kbase_ideal_gens
+        ]
         self.Rbase_ideal = self.Rbase.ideal(self.Rbase_equations)
         self.Rbase_to_R = self.Rbase.hom(list(K_vars) + list(R_vars), R)
 
-    def lift_polynomial(self, poly: MPolynomial_element) -> MPolynomial_element:
+    def lift_polynomial(
+        self, poly: MPolynomial_element
+    ) -> MPolynomial_element:
         """
         Lifts a polynomial in R to a polynomial in Rbase. This is of
         course not well-defined: we pick one element in the preimage.
@@ -52,3 +58,17 @@ class PolynomialRingOverFormalNumberField:
         """
         projected_gens = sorted([self.Rbase_to_R(x) for x in I.gens()])
         return self.R.ideal([p for p in projected_gens if p != 0])
+
+    def ideal_quotient(
+        self, I: MPolynomialIdeal, J: MPolynomialIdeal
+    ) -> MPolynomialIdeal:
+        """
+        Given two ideal I, J or a polynomial ring R = K[x1,...,xn],
+        computes the ideal quotient (I:J). It makes use of the following
+        idea. Let H = Kbase[x1, ..., xn], so there is a quotient map
+        f : H ---> H/Kideal = R. Then, there is the identity
+        f((f^{-1}(I) : f^{-1}(J))) = (I : J).
+        """
+        I_lift = self.lift_ideal(I)
+        J_lift = self.lift_ideal(J)
+        return self.project_ideal(I_lift.quotient(J_lift))

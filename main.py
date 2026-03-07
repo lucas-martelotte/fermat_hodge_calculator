@@ -23,8 +23,10 @@ from src.hodge_cycles.hodge_cycle_factories import (
     AokiShiodaType2BFactory,
     ExceptionalTypeCFactory,
     ExceptionalTypeCBFactory,
-    ExceptionalTypeNBFactory
+    ExceptionalTypeNBFactory,
 )
+from src.hodge_calculator import ArtinianGoresteinCalculator
+from src.formal_algebra import FormalIdealDissector
 
 
 start_time = perf_counter()
@@ -36,10 +38,25 @@ start_time = perf_counter()
 # blocked_matrix = zero_matrix(RR, 600, 900 * 96)
 # print("Created mat")
 
-d = 12
+d = 6
 hodge_calculator_factory = HodgeCalculatorFactory()
-X, calculator = hodge_calculator_factory.create((12, 12, 12, 12))
-K_formal = X.formal_base_field
+X, calculator = hodge_calculator_factory.create((6, 6, 6, 6))
+R_formal, K_formal = X.formal_polynomial_ring, X.formal_base_field
+
+as3_data = calculator.get_hodge_cycle_factory_data("as3")
+as3_coords = as3_data["coordinates"]
+
+as3_1 = [as3_coords[i, 2] for i in range(as3_coords.nrows())]
+
+gorestein = ArtinianGoresteinCalculator(calculator)
+ideal = gorestein.get_artinian_gorestein_ideal_of(as3_1)
+print(ideal)
+
+dissector = FormalIdealDissector(X.formal_polynomial_ring, X.weights, ideal)
+for i in range(6):
+    print(dissector.get_dimension_of_new_elements_of_component(i))
+
+exit()
 
 # root3of2 = K_formal.from_str("root3of2")
 # zeta12 = K_formal.from_str("zeta12")

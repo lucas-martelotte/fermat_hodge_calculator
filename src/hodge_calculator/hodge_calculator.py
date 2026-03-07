@@ -54,6 +54,33 @@ class HodgeCalculator(BasicHodgeCalculator):
             }
         )
 
+    def get_cycle_polynomial(
+        self, x: list[int] | Matrix_integer_dense
+    ) -> MPolynomial_element:
+        """
+        Returns the polynomial associated to the cycle x. Here, x is seen
+        as a coordinate vector in the Z-basis of the free Z-module of
+        primitive hodge cycles returned by the function
+        'get_basis_of_primitive_hodge_cycles'.
+        """
+        dual_period_matrix = (
+            self.get_dual_period_matrix_of_primitive_hodge_cycles()
+        )
+        x_mat = Matrix(ZZ, dual_period_matrix.nrows(), 1, x)
+        I, xs = (
+            self.multi_indexes,
+            self.variety.polynomial_variables,
+        )
+        J_hodge = self.get_form_idxs_at_infty_in_middle_hodge_comp()
+        R, n = self.variety.polynomial_ring, self.variety.dimension
+        coeffs = dual_period_matrix.T * x_mat
+        cycle_polynomial: MPolynomial_element = R(0)
+        for i in range(coeffs.nrows()):
+            curr_form = I[J_hodge[i]]
+            form_monomial = prod(xs[i] ** curr_form[i] for i in range(n + 2))
+            cycle_polynomial += coeffs[i, 0] * form_monomial
+        return cycle_polynomial
+
     def __compute_periods_of_primitive_hodge_cycles(
         self,
     ) -> dict[str, Any]:
@@ -179,10 +206,22 @@ class HodgeCalculator(BasicHodgeCalculator):
         writen on the standard Z-basis of primitive hodge cycles.
         """
         K_formal = self.variety.formal_base_field
-        hodge_period_matrix = self.get_period_matrix_of_primitive_hodge_cycles()
-        hodge_period_matrix_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(hodge_period_matrix)
-        period_matrix_to_solve_blocked = K_formal.convert_to_rational_horizontally_blocked_matrix(period_matrix_to_solve)
-        period_coords = hodge_period_matrix_blocked.solve_left(period_matrix_to_solve_blocked).T
+        hodge_period_matrix = (
+            self.get_period_matrix_of_primitive_hodge_cycles()
+        )
+        hodge_period_matrix_blocked = (
+            K_formal.convert_to_rational_horizontally_blocked_matrix(
+                hodge_period_matrix
+            )
+        )
+        period_matrix_to_solve_blocked = (
+            K_formal.convert_to_rational_horizontally_blocked_matrix(
+                period_matrix_to_solve
+            )
+        )
+        period_coords = hodge_period_matrix_blocked.solve_left(
+            period_matrix_to_solve_blocked
+        ).T
         return Matrix(QQ, period_coords)  # Solution must lie inside (1/d)*ZZ
 
     def get_hodge_cycle_factory_data(self, filename: str) -> dict[str, Any]:

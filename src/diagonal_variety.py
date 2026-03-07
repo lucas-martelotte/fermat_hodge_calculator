@@ -15,7 +15,7 @@ class EvenDimensionalDiagonalVariety:
         self.exps = exps
         assert len(exps) % 2 == 0 and len(exps) > 0
         self.degree = lcm(*exps)
-        self.weights = tuple([self.degree // e for e in exps])
+        self.weights: tuple[int, ...] = tuple(self.degree // e for e in exps)
         self.dimension = len(exps) - 2
         self.formal_polynomial_ring = formal_polynomial_ring
         xs, ms = self.polynomial_variables, exps

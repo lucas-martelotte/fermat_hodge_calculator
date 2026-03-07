@@ -555,10 +555,10 @@ gamma_values = {
     (2, 6, 9, 11): K_formal.K(0),
     (4, 5, 7, 12): K_formal.K(0),
     # Exceptional cycles
-    (4, 5, 6, 13): K_formal.K(0),
-    (1, 4, 11, 12): K_formal.K(0),
-    (1, 7, 9, 11): K_formal.K(0),
-    (3, 5, 7, 13): K_formal.K(0),
+    (4, 5, 6, 13): K_formal.K(0), # DONE
+    (1, 4, 11, 12): K_formal.K(0), # DONE
+    (1, 7, 9, 11): K_formal.K(0), # done
+    (3, 5, 7, 13): K_formal.K(0), # done
     (3, 5, 8, 12): K_formal.K(0),
 }
 """

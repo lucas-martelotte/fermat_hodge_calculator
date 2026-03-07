@@ -23,6 +23,7 @@ from src.hodge_cycles.hodge_cycle_factories import (
     AokiShiodaType2BFactory,
     ExceptionalTypeCFactory,
     ExceptionalTypeCBFactory,
+    ExceptionalTypeNBFactory
 )
 
 
@@ -49,9 +50,10 @@ zeta24 = K_formal.from_str("zeta24")
 alpha = K_formal.from_str("alpha")
 zeta12 = zeta24**2
 root3of2 = root6of2**2
+root2 = root6of2**3
 # factory = AokiShiodaType2BFactory(X, [0, 1, 2, 3], root4of2, zeta16)
-factory = ExceptionalTypeCBFactory(X, [0, 1, 2, 3], zeta12, root3of2, alpha)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "cb")
+factory = ExceptionalTypeNBFactory(X, [0, 1, 2, 3], zeta12, root2)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "nb")
 
 end_time = perf_counter()
 print(end_time - start_time)

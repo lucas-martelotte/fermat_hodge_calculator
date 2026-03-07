@@ -40,13 +40,6 @@ hodge_calculator_factory = HodgeCalculatorFactory()
 X, calculator = hodge_calculator_factory.create((12, 12, 12, 12))
 K_formal = X.formal_base_field
 
-
-cb_data = calculator.get_hodge_cycle_factory_data("cb")
-print(cb_data["rank"])
-
-
-exit()
-
 # root3of2 = K_formal.from_str("root3of2")
 # zeta12 = K_formal.from_str("zeta12")
 # root3 = K_formal.from_str("root3")
@@ -57,8 +50,8 @@ alpha = K_formal.from_str("alpha")
 zeta12 = zeta24**2
 root3of2 = root6of2**2
 # factory = AokiShiodaType2BFactory(X, [0, 1, 2, 3], root4of2, zeta16)
-factory = ExceptionalTypeCBFactory(X, [0, 1, 2, 3], zeta12, root3of2, alpha)
-calculator.compute_periods_from_hodge_cycle_factory(factory, "cb")
+factory = ExceptionalTypeCFactory(X, [0, 1, 2, 3], zeta12, alpha)
+calculator.compute_periods_from_hodge_cycle_factory(factory, "c")
 
 end_time = perf_counter()
 print(end_time - start_time)

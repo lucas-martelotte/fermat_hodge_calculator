@@ -9,6 +9,7 @@ from .sage_imports import (
     Matrix,
     ZZ,
 )
+from typing import Callable
 from itertools import product as iterprod, combinations
 from math import factorial
 from collections import Counter
@@ -120,3 +121,77 @@ def count_fixed_permutations(a: tuple) -> int:
     for c in cnt.values():
         res *= factorial(c)
     return res
+
+
+def sage_RREF(
+    M: Matrix_generic_dense, inv: Callable = lambda x: x.inverse()
+) -> tuple[Matrix_generic_dense, Matrix_generic_dense, list[int]]:
+    """
+    Returns a pair (R, E) where R in in row echelon form,
+    E is invertible and R = EM.
+    """
+    K = M.base_ring()
+    rows, cols = M.nrows(), M.ncols()
+    A = Matrix(K, rows, cols, M)
+    E_total = identity_matrix(K, rows)
+    pivot_row = 0
+    pivot_col = 0
+
+    def elementary_swap(n, i, j):
+        E = identity_matrix(K, n)
+        E[i, i], E[j, j] = 0, 0
+        E[i, j], E[j, i] = 1, 1
+        return E
+
+    def elementary_scale(n, i, k):
+        E = identity_matrix(K, n)
+        E[i, i] = k
+        return E
+
+    def elementary_add(n, i, j, k):
+        # row i += k * row j
+        E = identity_matrix(K, n)
+        E[i, j] = k
+        return E
+
+    while pivot_row < rows and pivot_col < cols:
+        # Step 1: Find pivot in current column
+        pivot = None
+        for r in range(pivot_row, rows):
+            if A[r, pivot_col] != 0:
+                pivot = r
+                break
+        # If no pivot in this column → move to next column
+        if pivot is None:
+            pivot_col += 1
+            continue
+        # Step 2: Swap the pivot row into place
+        if pivot != pivot_row:
+            E = elementary_swap(rows, pivot_row, pivot)
+            A = E * A
+            E_total = E * E_total
+        # Step 3: Scale pivot row to make pivot = 1
+        pivot_val = A[pivot_row, pivot_col]
+        if pivot_val != 1:
+            pivot_val_inv = inv(pivot_val)
+            E = elementary_scale(rows, pivot_row, pivot_val_inv)
+            A = E * A
+            E_total = E * E_total
+        # Step 4: Eliminate rows below
+        for r in range(pivot_row + 1, rows):
+            if A[r, pivot_col] != 0:
+                factor = -A[r, pivot_col]
+                E = elementary_add(rows, r, pivot_row, factor)
+                A = E * A
+                E_total = E * E_total
+        pivot_row += 1
+        pivot_col += 1
+    pivots: list[int] = []
+    curr_pivot_row = 0
+    for j in range(cols):
+        if A[curr_pivot_row, j] != 0:
+            pivots.append(j)
+            curr_pivot_row += 1
+            if curr_pivot_row >= rows:
+                break
+    return A, E_total, pivots  # R = E * M

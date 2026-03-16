@@ -25,6 +25,7 @@ from src.utils.sage_imports import (
     Rat,
     sqrt,
     exp,
+    sin,
     pi,
     I,
 )
@@ -89,8 +90,14 @@ class GammaDatabase:  # TODO Fix issue with singleton metaclass
             for gamma_tuple, gamma_value in gamma_values.items():
                 gamma_value_1 = embedding(str(gamma_value))
                 gamma_value_2 = self.gamma_product(gamma_tuple, degree)
-                assert len(gamma_tuple) == dimension + 2
-                assert abs(gamma_value_2 - gamma_value_1) < 0.00001
+                try:
+                    assert len(gamma_tuple) == dimension + 2
+                    assert abs(gamma_value_2 - gamma_value_1) < 0.00001
+                except:
+                    print(gamma_tuple)
+                    print(gamma_value_1)
+                    print(gamma_value_2)
+                    raise AssertionError()
         self._database[key] = gamma_structure
 
     def get(self, key: tuple[int, int]) -> GammaStructure:
@@ -477,13 +484,13 @@ gamma_values = {
     (4, 4, 6, 10): -1 / (root3 * root3of2**2),
     # Aoki-shioda ("true aoki-shioda")
     (1, 5, 9, 9): -root4of3 / root2,
-    (1, 6, 7, 10): -1 / root6of2,
+    (1, 7, 8, 8): -root2 / root3,
     (2, 5, 6, 11): -1 / root6of2**5,
     (3, 3, 7, 11): -1 / (root2 * root4of3),
     # Exceptional cycles
     (1, 4, 9, 10): -root3of2 / alpha,
+    (1, 6, 7, 10): -1 / root6of2,
     (1, 6, 8, 9): -(1 + zeta12 - zeta12**3) * zeta24 * alpha / (2 * root4of3),
-    (1, 7, 8, 8): -root2 / root3,
     (2, 3, 8, 11): -root6of2 / (alpha * root4of3),
     (2, 5, 8, 9): -(root2 * root3of2**2)
     / (2 * (1 + zeta12 - zeta12**3) * zeta24 * alpha),
@@ -509,12 +516,16 @@ embedding: Callable[[str], complex] = lambda expr: complex(
 GAMMA_DATABASE.add((2, 12), GammaStructure(K_formal, gamma_values, embedding))
 
 
-# === degree 14 surface === #
 """
+# === degree 14 surface === # TODO
 K_formal = FormalCyclotomicField(28)
+root7of2 = K_formal.K(1)  # TODO
+sin_6_14 = K_formal.K(1)  # TODO
+sin_4_14 = K_formal.K(1)  # TODO
+sin_2_14 = K_formal.K(1)  # TODO
 gamma_values = {
     # Lines (on degree 2)
-    (7, 7, 7, 7): K_formal.K(0),
+    (7, 7, 7, 7): -K_formal.K(1) / 4,
     # Lines (on degree 7)
     (2, 2, 12, 12): K_formal.K(0),
     (2, 4, 10, 12): K_formal.K(0),
@@ -545,20 +556,295 @@ gamma_values = {
     (5, 7, 7, 9): K_formal.K(0),
     (6, 7, 7, 8): K_formal.K(0),
     # Aoki-shioda ("true aoki-shioda")
-    (1, 8, 9, 10): K_formal.K(0),
-    (2, 6, 7, 13): K_formal.K(0),
-    (1, 7, 8, 12): K_formal.K(0),
-    (2, 7, 9, 10): K_formal.K(0),
-    (2, 3, 10, 13): K_formal.K(0),
-    (4, 6, 7, 11): K_formal.K(0),
-    (3, 7, 8, 10): K_formal.K(0),
-    (2, 6, 9, 11): K_formal.K(0),
-    (4, 5, 7, 12): K_formal.K(0),
+    (1, 8, 9, 10): -(root7of2**4) / (2 * sin_4_14),
+    (2, 3, 10, 13): -(root7of2**5) / (4 * sin_2_14),
+    (2, 6, 9, 11): -root7of2 / (2 * sin_6_14),
+    (1, 7, 8, 12): -(root7of2**6) / (4 * sin_2_14),
+    (2, 6, 7, 13): -root7of2 / (4 * sin_2_14),
+    (2, 7, 9, 10): -(root7of2**5) / (4 * sin_4_14),
+    (3, 7, 8, 10): -(root7of2**4) / (4 * sin_6_14),
+    (4, 5, 7, 12): -(root7of2**2) / (4 * sin_4_14),
+    (4, 6, 7, 11): -(root7of2**3) / (4 * sin_6_14),
     # Exceptional cycles
-    (4, 5, 6, 13): K_formal.K(0), # DONE
-    (1, 4, 11, 12): K_formal.K(0), # DONE
-    (1, 7, 9, 11): K_formal.K(0), # done
-    (3, 5, 7, 13): K_formal.K(0), # done
-    (3, 5, 8, 12): K_formal.K(0),
+    (1, 4, 11, 12): -(root7of2**2) / (2 * sin_2_14),
+    (1, 7, 9, 11): -K_formal.K(1),  # HAD TO USE DUPLICATION!!! (???)
+    (3, 5, 7, 13): -K_formal.K(1) / 2,  # HAD TO USE DUPLICATION!!! (???)
+    (3, 5, 8, 12): -(root7of2**6) / (4 * sin_6_14),
+    (4, 5, 6, 13): -(root7of2**3) / (4 * sin_4_14),
 }
 """
+
+# === degree 15 surface === # TODO
+Kbase = PolynomialRing(
+    QQ,
+    ["zeta15base", "root5of3base", "root6of5base", "betabase"],
+)
+zeta15base, root5of3base, root6of5base, betabase = Kbase.gens()
+root5base = -2 * zeta15base**7 + 2 * zeta15base**3 - 2 * zeta15base**2 + 1
+Kbase_equations = [
+    zeta15base**8
+    - zeta15base**7
+    + zeta15base**5
+    - zeta15base**4
+    + zeta15base**3
+    - zeta15base
+    + 1,
+    root5of3base**5 - 3,
+    root6of5base**3 - root5base,
+    betabase**2
+    - 12
+    * (
+        +3 * zeta15base**6
+        - zeta15base**5
+        - 2 * zeta15base**4
+        + zeta15base**3
+        - 2 * zeta15base**2
+        + 4 * zeta15base
+        + 8
+    )
+    * root6of5base
+    / 5,
+]
+K_formal = FormalNumberField(Kbase, Kbase_equations)
+zeta15 = K_formal.from_str("zeta15")
+root5of3 = K_formal.from_str("root5of3")
+root6of5 = K_formal.from_str("root6of5")
+beta = K_formal.from_str("beta")
+root5 = -2 * zeta15**7 + 2 * zeta15**3 - 2 * zeta15**2 + 1
+
+# OH MY GOD!!!!!!! THE SIN FUNCTIONS TIMES 3^(1/10) LIES INSIDE THE FIELD!!!!!!
+sin_1_15_root10of3 = (
+    -(zeta15**2) * (zeta15**6 - zeta15**5 + 2 * zeta15 - 2) * root5of3**3 / 6
+)
+sin_2_15_root10of3 = (
+    -(zeta15**2)
+    * (zeta15**6 + zeta15**4 + zeta15**3 - 2 * zeta15**2 + 1)
+    * root5of3**3
+    / 6
+)
+sin_3_15_root10of3 = (
+    -zeta15 * (zeta15**8 - zeta15**5 + 2 * zeta15**3 - 2) * root5of3**3 / 6
+)
+sin_4_15_root10of3 = (
+    -(zeta15**2) * (zeta15**6 + 2 * zeta15**5 - zeta15 + 1) * root5of3**3 / 6
+)
+sin_5_15_root10of3 = root5of3**3 / 2
+sin_6_15_root10of3 = (
+    -(zeta15**2) * (2 * zeta15**6 + zeta15**5 + zeta15 - 1) * root5of3**3 / 6
+)
+sin_7_15_root10of3 = (
+    zeta15 * (-2 * zeta15**8 - zeta15**5 - zeta15**3 + 1) * root5of3**3 / 6
+)
+
+sin_1_15_1_15 = sin_1_15_root10of3 * sin_1_15_root10of3 / root5of3
+sin_1_15_2_15 = sin_1_15_root10of3 * sin_2_15_root10of3 / root5of3
+sin_1_15_3_15 = sin_1_15_root10of3 * sin_3_15_root10of3 / root5of3
+sin_1_15_4_15 = sin_1_15_root10of3 * sin_4_15_root10of3 / root5of3
+sin_1_15_5_15 = sin_1_15_root10of3 * sin_5_15_root10of3 / root5of3
+sin_1_15_6_15 = sin_1_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_1_15_7_15 = sin_1_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_2_15_2_15 = sin_2_15_root10of3 * sin_2_15_root10of3 / root5of3
+sin_2_15_3_15 = sin_2_15_root10of3 * sin_3_15_root10of3 / root5of3
+sin_2_15_4_15 = sin_2_15_root10of3 * sin_4_15_root10of3 / root5of3
+sin_2_15_5_15 = sin_2_15_root10of3 * sin_5_15_root10of3 / root5of3
+sin_2_15_6_15 = sin_2_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_2_15_7_15 = sin_2_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_3_15_3_15 = sin_3_15_root10of3 * sin_3_15_root10of3 / root5of3
+sin_3_15_4_15 = sin_3_15_root10of3 * sin_4_15_root10of3 / root5of3
+sin_3_15_5_15 = sin_3_15_root10of3 * sin_5_15_root10of3 / root5of3
+sin_3_15_6_15 = sin_3_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_3_15_7_15 = sin_3_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_4_15_4_15 = sin_4_15_root10of3 * sin_4_15_root10of3 / root5of3
+sin_4_15_5_15 = sin_4_15_root10of3 * sin_5_15_root10of3 / root5of3
+sin_4_15_6_15 = sin_4_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_4_15_7_15 = sin_4_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_5_15_5_15 = sin_5_15_root10of3 * sin_5_15_root10of3 / root5of3
+sin_5_15_6_15 = sin_5_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_5_15_7_15 = sin_5_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_6_15_6_15 = sin_6_15_root10of3 * sin_6_15_root10of3 / root5of3
+sin_6_15_7_15 = sin_6_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+sin_7_15_7_15 = sin_7_15_root10of3 * sin_7_15_root10of3 / root5of3
+
+# old_beta = 2^(1/2) * 3^(1/20) * 5^(-1/12) * sqrt(sqrt(3) - (sqrt(5) - 3)/(4 * sin_3_15))
+# new_beta = 2^(1/2) * 3^(3/4) * 5^(1/12) * sqrt(sqrt(3) - (sqrt(5) - 3)/(4 * sin_3_15))
+# old_beta/root3 = old_beta*root3/3 = new_beta/(3*root6of5*root5of3)
+
+
+# OBS.: sin_3_15 = sqrt(2) * sqrt(5 - sqrt(5))
+#       sin_6_16 = sqrt(2) * sqrt(5 + sqrt(5))
+"""
+sin_1_15 = -(zeta15**7) * (1 - zeta15) * zeta4 / 2
+sin_2_15 = -(zeta15**2) * (zeta15**6 - zeta15**4 + zeta15**3 + 1) * zeta4 / 2
+sin_3_15 = ((zeta15**7 - zeta15**3 + zeta15**2 - 1) / 2 - zeta15**6) * zeta4
+sin_4_15 = -(zeta15**2) * (zeta15**6 + zeta15 + 1) * zeta4 / 2
+sin_5_15 = root3 / 2
+sin_6_15 = -(zeta15**2) * (zeta15**5 + zeta15 + 1) * zeta4 / 2
+sin_7_15 = -zeta15 * (zeta15**5 + zeta15**3 + 1) * zeta4 / 2
+"""
+# (-1/2*zeta15^7 + 1/2*zeta15^5 - 1/2*zeta15^4 - 1/2*zeta15^2 - 1/2*zeta15 + 1/2)*zeta4
+gamma_values = {
+    # Lines
+    (1, 6, 9, 14): -1 / (4 * sin_1_15_6_15),
+    (2, 3, 12, 13): -1 / (4 * sin_2_15_3_15),
+    (6, 6, 9, 9): -1 / (4 * sin_6_15_6_15),
+    (1, 1, 14, 14): -1 / (4 * sin_1_15_1_15),
+    (6, 7, 8, 9): -1 / (4 * sin_6_15_7_15),
+    (2, 6, 9, 13): -1 / (4 * sin_2_15_6_15),
+    (3, 3, 12, 12): -1 / (4 * sin_3_15_3_15),
+    (1, 2, 13, 14): -1 / (4 * sin_1_15_2_15),
+    (4, 6, 9, 11): -1 / (4 * sin_4_15_6_15),
+    (1, 4, 11, 14): -1 / (4 * sin_1_15_4_15),
+    (5, 6, 9, 10): -1 / (4 * sin_5_15_6_15),
+    (4, 4, 11, 11): -1 / (4 * sin_4_15_4_15),
+    (1, 5, 10, 14): -1 / (4 * sin_1_15_5_15),
+    (5, 7, 8, 10): -1 / (4 * sin_5_15_7_15),
+    (2, 4, 11, 13): -1 / (4 * sin_2_15_4_15),
+    (2, 5, 10, 13): -1 / (4 * sin_2_15_5_15),
+    (5, 5, 10, 10): -1 / (4 * sin_5_15_5_15),
+    (1, 7, 8, 14): -1 / (4 * sin_1_15_7_15),
+    (2, 7, 8, 13): -1 / (4 * sin_2_15_7_15),
+    (3, 4, 11, 12): -1 / (4 * sin_3_15_4_15),
+    (7, 7, 8, 8): -1 / (4 * sin_7_15_7_15),
+    (3, 5, 10, 12): -1 / (4 * sin_3_15_5_15),
+    (4, 7, 8, 11): -1 / (4 * sin_4_15_7_15),
+    (1, 3, 12, 14): -1 / (4 * sin_1_15_3_15),
+    (2, 2, 13, 13): -1 / (4 * sin_2_15_2_15),
+    (3, 6, 9, 12): -1 / (4 * sin_3_15_6_15),
+    (3, 7, 8, 12): -1 / (4 * sin_3_15_7_15),
+    (4, 5, 10, 11): -1 / (4 * sin_4_15_5_15),
+    # Aoki-Shioda
+    # -2*3^(3/10)/sqrt(-2*sqrt(5) + 10)
+    (1, 6, 11, 12): -(root5of3**2) / (2 * sin_3_15_root10of3),
+    # -2/3*3^(7/10)/sqrt(-2*sqrt(5) + 10)
+    (3, 4, 9, 14): -(root5of3**4) / (6 * sin_3_15_root10of3),
+    # -2*3^(1/10)/sqrt(2*sqrt(5) + 10)
+    (2, 7, 9, 12): -root5of3 / (2 * sin_6_15_root10of3),
+    # -2/3*3^(9/10)/sqrt(2*sqrt(5) + 10)
+    (3, 6, 8, 13): -1 / (2 * sin_6_15_root10of3),
+    # Exceptional cycles
+    # THE BELOW VALUE IS EQUAL TO:
+    # -2*sqrt(2/15)*sqrt(5^(5/6)*3^(1/10)*sin(4/15*pi)*sin(2/15*pi)/sqrt(-2*sqrt(5) + 10))
+    (3, 5, 8, 14): -(beta / (3 * root6of5 * root5of3)) / 2,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (1, 7, 10, 12) TIMES
+    # -1/6*3^(9/10)*sqrt(-2*sqrt(5) + 10)*sin(7/15*pi)/sqrt(2*sqrt(5) + 10)
+    (1, 6, 10, 13): -4
+    * (beta / (3 * root6of5 * root5of3))
+    * root6of5
+    * sin_7_15_root10of3
+    * sin_4_15_root10of3
+    * sin_1_15_root10of3,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (4, 7, 9, 10) TIMES
+    # -1/2*3^(3/10)*sqrt(2*sqrt(5) + 10)*sin(4/15*pi)/sqrt(-2*sqrt(5) + 10)
+    (1, 7, 10, 12): -8
+    * (beta / (3 * root6of5 * root5of3))
+    * root6of5
+    * sin_7_15_root10of3
+    * sin_4_15_root10of3
+    * sin_1_15_root10of3
+    * sin_2_15_root10of3,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (2, 5, 11, 12) TIMES
+    # -1/6*3^(7/10)*sin(4/15*pi)
+    (2, 5, 9, 14): -(beta / (3 * root6of5 * root5of3))
+    * sin_3_15_root10of3
+    * sin_7_15_root10of3
+    / sin_6_15_root10of3,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (5, 6, 8, 11) TIMES
+    # -1/2*3^(1/10)*sin(7/15*pi)
+    (2, 5, 11, 12): -2
+    * (beta / (3 * root6of5 * root5of3))
+    * root5of3
+    * sin_7_15_root10of3
+    * sin_1_15_root10of3,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (1, 6, 10, 13) TIMES
+    # -1/6*3^(7/10)*sqrt(2*sqrt(5) + 10)*sin(1/15*pi)/sqrt(-2*sqrt(5) + 10)
+    (3, 4, 10, 13): -8
+    * (beta / (3 * root6of5 * root5of3))
+    * root6of5
+    * sin_4_15_7_15
+    * sin_1_15_6_15
+    * sin_1_15_root10of3
+    / sin_3_15_root10of3,
+    # APPARENTLY ALL OF THE TUPLES BELOW ARE WRONG !!!
+    # APPARENTLY ALL OF THE TUPLES BELOW ARE WRONG !!!
+    # APPARENTLY ALL OF THE TUPLES BELOW ARE WRONG !!!
+    # APPARENTLY ALL OF THE TUPLES BELOW ARE WRONG !!!
+    # APPARENTLY ALL OF THE TUPLES BELOW ARE WRONG !!!
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (3, 4, 10, 13) TIMES
+    # -2*3^(1/10)*sin(4/15*pi)*sin(2/15*pi)*sin(1/15*pi)
+    (4, 7, 9, 10): -16
+    * (beta / (3 * root6of5 * root5of3))
+    * root6of5
+    * sin_7_15_root10of3
+    * sin_1_15_4_15
+    * sin_1_15_2_15,
+    # THE BELOW VALUE IS EQUAL TO (up to roots of unity) (3, 5, 8, 14) TIMES
+    # -2*3^(3/10)*sqrt(-2*sqrt(5) + 10)*sin(7/15*pi)*sin(2/15*pi)*sin(1/15*pi)/sqrt(2*sqrt(5) + 10)
+    (5, 6, 8, 11): -4
+    * (beta / (3 * root6of5 * root5of3))
+    * root5of3**2
+    * sin_1_15_2_15
+    * sin_3_15_7_15
+    / sin_6_15_root10of3,
+}
+embedding_locals = {
+    "zeta15": exp(2 * pi * I / 15),
+    "root5of3": 3 ** (QQ(1) / 5),
+    "root6of5": 5 ** (QQ(1) / 6),
+    "beta": sqrt(2)
+    * 3 ** (QQ(3) / 4)
+    * 5 ** (QQ(1) / 12)
+    * sqrt(sqrt(3) - (5 ** (QQ(1) / 2) - 3) / (4 * sin(3 * pi / 15))),
+}
+embedding: Callable[[str], complex] = lambda expr: complex(
+    sage_eval(expr, locals=embedding_locals).n()
+)
+GAMMA_DATABASE.add((2, 15), GammaStructure(K_formal, gamma_values, embedding))
+
+
+# -2*sqrt(2/15)*5^(5/12)*3^(1/20)*sqrt(sin(4/15*pi)*sin(2/15*pi)/sqrt(-2*sqrt(5) + 10))
+# sin(4/15*pi)*sin(2/15*pi) = (3 - sqrt(5) + sqrt(6(5 - sqrt(5))))/16
+# -(1/2)*sqrt(2/15)*5^(5/12)*3^(1/20)*sqrt((3 - sqrt(5) + sqrt(6(5 - sqrt(5))))/sqrt(-2*sqrt(5) + 10))
+# -(1/2)*sqrt(2/15)*5^(5/12)*3^(1/20)*sqrt(sqrt(3) - (sqrt(5) - 3)/(sqrt(2(5 - sqrt(5)))))
+# -(1/2)*(1/sqrt(3))*5^(-1/12)*3^(1/20)*sqrt(2)*sqrt(sqrt(3) - (sqrt(5) - 3)/(sqrt(2(5 - sqrt(5)))))
+# -(1/2)*(1/sqrt(3))*beta
+
+# -2*3^(3/10)*sqrt(-2*sqrt(5) + 10)*sin(7/15*pi)*sin(2/15*pi)*sin(1/15*pi)/sqrt(2*sqrt(5) + 10)
+# -2*3^(3/10)*sin_3_15*sin_7_15*sin_2_15*sin_1_15/sin_6_15
+
+"""
+sin_1_15_1_15 = (
+    zeta15**7 - zeta15**6 + zeta15**4 - zeta15**3 + zeta15**2 - zeta15 + 1
+) / 4
+sin_1_15_2_15 = (
+    -(zeta15**7) + zeta15**5 - zeta15**4 + zeta15**2 - zeta15
+) / 4
+sin_1_15_3_15 = (
+    zeta15**6 - zeta15**5 + zeta15**3 - 2 * zeta15**2 + 2 * zeta15
+) / 4
+sin_1_15_4_15 = (root5 - 1) / 8
+sin_1_15_5_15 = (
+    zeta15**5 - zeta15**4 - zeta15**3 + 2 * zeta15**2 - zeta15 + 1
+) / 4
+sin_1_15_6_15 = (-(zeta15**6) + zeta15**4 - zeta15 + 1) / 4
+sin_1_15_7_15 = (
+    -(zeta15**7) + zeta15**6 - zeta15**4 + zeta15**3 - zeta15**2 + zeta15
+) / 4
+sin_2_15_2_15 = (
+    4 * zeta15**7 - zeta15**5 + zeta15**4 - zeta15**2 + zeta15 + 1
+) / 4
+"""
+
+# x**6 + 36288*zeta15**7 + 72576*zeta15**6/5 - 67392*zeta15**5/5 - 5184*zeta15**4/5 - 114048*zeta15**3/5 + 46656*zeta15**2/5 +139968*zeta15/5 - L(31104)/5
+# (x^2 + (36/5*zeta15^7 - 36/5*zeta15^6 - 96/5*zeta15^5 - 12/5*zeta15^4 - 12/5*zeta15^3 + 24/5*zeta15^2 + 24/5*zeta15 - 24/5)*root6of5) * (x^2 + (-36/5*zeta15^6 + 12/5*zeta15^5 + 24/5*zeta15^4 - 12/5*zeta15^3 + 24/5*zeta15^2 - 48/5*zeta15 - 96/5)*root6of5) * (x^2 + (-36/5*zeta15^7 + 72/5*zeta15^6 + 84/5*zeta15^5 - 12/5*zeta15^4 + 24/5*zeta15^3 - 48/5*zeta15^2 + 24/5*zeta15 + 24)*root6of5)
+
+
+# MINIMAL EQUATION OF BETA
+# x^2 + (-36/5*zeta15^6 + 12/5*zeta15^5 + 24/5*zeta15^4 - 12/5*zeta15^3 + 24/5*zeta15^2 - 48/5*zeta15 - 96/5)*root6of5
+# x**2 + (-36*zeta15**6 + 12*zeta15**5 + 24*zeta15**4 - 12*zeta15**3 + 24*zeta15**2 - 48*zeta15 - 96)*root6of5/5
+# DEGREE = 8 * 5 * 3 * 2 = 240

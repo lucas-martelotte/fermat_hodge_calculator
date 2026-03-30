@@ -5,3 +5,4 @@ from .as2b_factory import AokiShiodaType2BFactory
 from .c_factory import ExceptionalTypeCFactory
 from .cb_factory import ExceptionalTypeCBFactory
 from .nb_factory import ExceptionalTypeNBFactory
+from .bb_factory import OrdinaryTypeBBFactory

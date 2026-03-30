@@ -17,6 +17,8 @@ from sage.all import (
     gamma,
     zero_matrix,
     cyclotomic_polynomial,
+    sin,
+    factor,
 )
 from sage.all import Rational as Rat
 from sage.all import (

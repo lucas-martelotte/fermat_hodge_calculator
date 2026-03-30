@@ -24,9 +24,10 @@ def coprimes(n: int):
     return [i for i in range(1, n + 1, 1) if gcd(i, n) == 1]
 
 
-def positive_divisors(n: int) -> list[int]:
-    """Returns the positive divisors of an integer"""
-    return [k for k in range(1, abs(n) + 1, 1) if n % k == 0]
+def positive_divisors(n: int, proper: bool = False) -> list[int]:
+    """Returns the (sorted) positive divisors of an integer"""
+    upper_bound = abs(n) if proper else abs(n) + 1
+    return [k for k in range(1, upper_bound, 1) if n % k == 0]
 
 
 def Z_basis_of_kernel(

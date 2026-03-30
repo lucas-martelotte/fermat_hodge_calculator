@@ -611,6 +611,8 @@ root5of3 = K_formal.from_str("root5of3")
 root6of5 = K_formal.from_str("root6of5")
 beta = K_formal.from_str("beta")
 root5 = -2 * zeta15**7 + 2 * zeta15**3 - 2 * zeta15**2 + 1
+zeta30 = -(zeta15**7) + zeta15**5 - zeta15**4 + zeta15**3 - zeta15 + 1
+K_formal.locals["zeta30"] = zeta30
 
 # OH MY GOD!!!!!!! THE SIN FUNCTIONS TIMES 3^(1/10) LIES INSIDE THE FIELD!!!!!!
 sin_1_15_root10of3 = (
@@ -848,3 +850,25 @@ sin_2_15_2_15 = (
 # x^2 + (-36/5*zeta15^6 + 12/5*zeta15^5 + 24/5*zeta15^4 - 12/5*zeta15^3 + 24/5*zeta15^2 - 48/5*zeta15 - 96/5)*root6of5
 # x**2 + (-36*zeta15**6 + 12*zeta15**5 + 24*zeta15**4 - 12*zeta15**3 + 24*zeta15**2 - 48*zeta15 - 96)*root6of5/5
 # DEGREE = 8 * 5 * 3 * 2 = 240
+
+
+""" Exceptional on degree 18
+(1, 6, 14, 15)  -> (3, 6, 9, 18)
+(1, 7, 12, 16)  -> (3, 9, 18, 18)
+(1, 9, 12, 14)  -> (3, 6, 9, 18)
+(1, 10, 12, 13) -> (3, 9, 18, 18)
+(2, 6, 11, 17)  -> (3, 9, 18, 18)
+(2, 6, 13, 15)  -> (3, 9, 18, 18)
+(2, 9, 12, 13)
+(3, 4, 12, 17)
+(3, 5, 12, 16)
+(3, 10, 11, 12)
+(4, 6, 9, 17)
+(4, 7, 12, 13)
+(5, 6, 8, 17)
+(5, 6, 9, 16)
+(5, 6, 11, 14)
+(6, 7, 8, 15)
+(6, 9, 10, 11)
+(7, 8, 9, 12)
+"""

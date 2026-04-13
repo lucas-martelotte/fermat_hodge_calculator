@@ -25,7 +25,7 @@ class JsonManager:
         if not exists(self.savepath):
             makedirs(self.savepath)
 
-    def _check_json(self, json_file: str | None = None) -> bool:
+    def _check_json(self, json_file: str) -> bool:
         self.check_folder()
         return exists(self.savepath + f"/{json_file}.json")
 

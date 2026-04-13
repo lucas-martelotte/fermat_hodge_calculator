@@ -19,7 +19,7 @@ def lcm(*args):
     return reduce(lambda a, b: a * b // gcd(a, b), args)
 
 
-def coprimes(n: int):
+def coprimes(n: int) -> list[int]:
     """Returns all positive (> 0) integers coprime with n"""
     return [i for i in range(1, n + 1, 1) if gcd(i, n) == 1]
 
